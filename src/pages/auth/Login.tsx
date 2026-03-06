@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { APP_ROUTES } from '../../config/routes.app';
 import { loginSchema, type LoginFormValues } from '../../lib/schemas/auth.schemas';
 import { useLoginMutation } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
@@ -51,7 +52,7 @@ export const Login: React.FC = () => {
 						<Label htmlFor='password' className='text-neutral-300'>
 							Password
 						</Label>
-						<Link to='/auth/forgot-password' className='text-xs text-blue-400 hover:text-blue-300 transition-colors'>
+						<Link to={APP_ROUTES.FORGOT_PASSWORD} className='text-xs text-blue-400 hover:text-blue-300 transition-colors'>
 							Forgot password?
 						</Link>
 					</div>

@@ -4,21 +4,14 @@ import { Toaster } from 'sonner';
 import { AuthLayout } from './components/AuthLayout';
 import { Login } from './pages/auth/Login';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
-
+import { APP_ROUTES } from './config/routes.app';
 import { TooltipProvider } from './components/ui/tooltip';
 import { AdminLayout } from './components/AdminLayout';
 import { Dashboard } from './pages/admin/Dashboard';
 import { StaffRoles } from './pages/admin/StaffRoles';
 import { StaffMembers } from './pages/admin/StaffMembers';
 
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			staleTime: 1000 * 60 * 5, // 5 minutes
-			retry: 1,
-		},
-	},
-});
+const queryClient = new QueryClient();
 
 function App() {
 	return (
@@ -35,7 +28,7 @@ function App() {
 						</Route>
 
 						{/* Admin Routes */}
-						<Route path='/admin' element={<AdminLayout />}>
+						<Route path={APP_ROUTES.DASHBOARD} element={<AdminLayout />}>
 							<Route index element={<Dashboard />} />
 							<Route path='roles' element={<StaffRoles />} />
 							<Route path='members' element={<StaffMembers />} />
