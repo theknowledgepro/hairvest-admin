@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { staffMembersApi, type CreateStaffMemberReq, type UpdateStaffMemberReq } from '../api/staffMembers';
+import { staffMembersApi } from '../api/staffMembers';
 import { queryKeys } from '@/config/query.keys';
 
 export const useStaffMembersQuery = () => {
@@ -22,7 +22,7 @@ export const useCreateMemberMutation = (onSuccess?: () => void) => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (data: CreateStaffMemberReq) => staffMembersApi.addStaffMember(data),
+		mutationFn: (data: FormData) => staffMembersApi.addStaffMember(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.staffMembers });
 			toast.success('Staff member added successfully!');
@@ -39,14 +39,30 @@ export const useUpdateMemberMutation = (onSuccess?: () => void) => {
 
 	return useMutation({
 		// Session refresh is handled server-side as part of the update request
-		mutationFn: ({ id, data }: { id: string; data: UpdateStaffMemberReq }) => staffMembersApi.updateStaffMember(id, data),
+		mutationFn: ({ id, data }: { id: string; data: FormData }) => staffMembersApi.updateStaffMember(id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.staffMembers });
-			toast.success('Staff member updated. Active sessions refreshed.');
+			toast.success('Staff member updated.');
 			onSuccess?.();
 		},
 		onError: (error: any) => {
 			toast.error(error.response?.data?.message || 'Failed to update staff member.');
+		},
+	});
+};
+
+export const useToggleStaffSuspensionMutation = (onSuccess?: () => void) => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (id: string) => staffMembersApi.toggleSuspension(id),
+		onSuccess: (res) => {
+			queryClient.invalidateQueries({ queryKey: queryKeys.staffMembers });
+			toast.success(res.message);
+			if (onSuccess) onSuccess();
+		},
+		onError: (error: any) => {
+			toast.error(error?.response?.data?.message || 'Failed to update staff member status');
 		},
 	});
 };

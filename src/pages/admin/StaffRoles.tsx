@@ -269,15 +269,15 @@ export const StaffRoles: React.FC = () => {
 				</DialogContent>
 			</Dialog>
 
-			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur'>
+			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0'>
 				<CardContent className='p-0'>
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
 								<TableHead className='text-neutral-400'>Role Name</TableHead>
 								<TableHead className='text-neutral-400'>Permissions</TableHead>
-								<TableHead className='text-neutral-400'>Created At</TableHead>
 								<TableHead className='text-neutral-400 text-right'>Actions</TableHead>
+								<TableHead className='text-neutral-400'>Created</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -314,7 +314,6 @@ export const StaffRoles: React.FC = () => {
 												{role.permissions.length === 0 && <span className='text-xs text-neutral-600 italic'>No permissions</span>}
 											</div>
 										</TableCell>
-										<TableCell className='text-neutral-400 text-sm'>{formatDate(role.createdAt)}</TableCell>
 										<TableCell className='text-right'>
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
@@ -332,12 +331,24 @@ export const StaffRoles: React.FC = () => {
 													</DropdownMenuItem>
 													<DropdownMenuSeparator className='bg-neutral-800' />
 													<DropdownMenuItem
-														onClick={() => deleteRole(role.id)}
+														onClick={() => {
+															if (confirm('Are you sure you want to delete this role?')) {
+																deleteRole(role.id);
+															}
+														}}
 														className='hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-400 text-red-400 cursor-pointer'>
 														<Trash2 className='mr-2 h-4 w-4' /> Delete
 													</DropdownMenuItem>
 												</DropdownMenuContent>
 											</DropdownMenu>
+										</TableCell>
+										<TableCell>
+											<div className='flex flex-col gap-0.5'>
+												{role.createdAt && <span className='text-[14px] text-neutral-200'>{formatDate(role.createdAt)}</span>}
+												{role.updatedAt && role.updatedAt !== role.createdAt && (
+													<span className='text-[13px] text-neutral-400'>Edited {formatDate(role.updatedAt)}</span>
+												)}
+											</div>
 										</TableCell>
 									</TableRow>
 								))

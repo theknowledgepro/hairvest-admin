@@ -10,6 +10,11 @@ import { AdminLayout } from './components/AdminLayout';
 import { Dashboard } from './pages/admin/Dashboard';
 import { StaffRoles } from './pages/admin/StaffRoles';
 import { StaffMembers } from './pages/admin/StaffMembers';
+import { ProductCategories } from './pages/admin/ProductCategories';
+import { Products } from './pages/admin/Products';
+import { ProductForm } from './pages/admin/ProductForm';
+import { Customers } from './pages/admin/Customers';
+import { CustomerDetails } from './pages/admin/CustomerDetails';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +37,16 @@ function App() {
 							<Route index element={<Dashboard />} />
 							<Route path='roles' element={<StaffRoles />} />
 							<Route path='members' element={<StaffMembers />} />
+							<Route path='customers'>
+								<Route index element={<Customers />} />
+								<Route path=':id' element={<CustomerDetails />} />
+							</Route>
+							<Route path='products'>
+								<Route index element={<Products />} />
+								<Route path='categories' element={<ProductCategories />} />
+								<Route path='new' element={<ProductForm />} />
+								<Route path='edit/:id' element={<ProductForm />} />
+							</Route>
 						</Route>
 
 						<Route path='*' element={<Navigate to='/' replace />} />

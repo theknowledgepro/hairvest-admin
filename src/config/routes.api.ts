@@ -9,4 +9,10 @@ export const API_ROUTES = {
 	STAFF_ROLES: '/staff/roles',
 	STAFF_PERMISSIONS: '/staff/roles/permissions',
 	STAFF_MEMBERS: '/staff/members',
+
+	PRODUCT_CATEGORIES: '/products/categories',
+	PRODUCTS: '/products',
+
+	CUSTOMERS: '/customers',
+	CUSTOMER_DETAILS: (id: string) => `/customers/${id}`,
 };

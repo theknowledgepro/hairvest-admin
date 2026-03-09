@@ -5,4 +5,10 @@ export const queryKeys = {
 	staffRoles: ['staff', 'roles'],
 	staffMembers: ['staff', 'members'],
 	staffPermissions: ['staff', 'permissions'],
+
+	productCategories: ['product-categories'],
+	products: ['products'],
+
+	customers: ['customers'],
+	customerDetails: (id: string) => ['customerDetails', id],
 };

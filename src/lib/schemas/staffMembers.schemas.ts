@@ -11,8 +11,12 @@ export const createMemberSchema = z.object({
 	lastName: z.string().min(1, 'Last name is required'),
 	email: z.email('Please enter a valid email address'),
 	phone: phoneSchema,
-	password: z.string().min(8, 'Default account password must be at least 8 characters'),
+	password: z
+		.string()
+		.optional()
+		.refine((val) => !val || val.length >= 8, { message: 'Default account password must be at least 8 characters' }),
 	roles: z.array(z.string()).min(1, 'Please select at least one role'),
+	suspended: z.boolean().optional(),
 });
 
 export type CreateMemberFormValues = z.infer<typeof createMemberSchema>;

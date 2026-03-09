@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
  */
 export const formatDate = (date: string | Date | null | undefined): string => {
 	if (!date) return '—';
-	return dayjs(date).format('ddd, DD MMM YYYY [at] HH:mm');
+	return dayjs(date).format('ddd, DD MMM YYYY [at] HH:mm a');
 };
 
 /**

@@ -6,10 +6,9 @@ import { useSidebarStore } from '../store/useSidebarStore';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
 import { getCloudFileURL } from '@/lib/utils';
+import { APP_ROUTES } from '@/config/routes.app';
 import { useLogoutMutation } from '@/hooks/useAuth';
 import ProtectedRoute from './ProtectedRoute';
-
-import { APP_ROUTES } from '@/config/routes.app';
 
 export const AdminLayout: React.FC = () => {
 	const { isOpen, toggle, close } = useSidebarStore();
@@ -54,7 +53,14 @@ export const AdminLayout: React.FC = () => {
 					<div className='flex-1 overflow-y-auto py-6 flex flex-col gap-1 px-3 mt-2'>
 						<div className='text-xs uppercase text-neutral-500 font-semibold mb-2 px-3 tracking-wider'>Dashboard</div>
 						{navLinks.map((link) => {
-							const isActive = location.pathname === link.path || (link.path !== '/admin' && location.pathname.startsWith(link.path));
+							const isActive =
+								location.pathname === link.path ||
+								(link.path !== APP_ROUTES.DASHBOARD &&
+									location.pathname.startsWith(link.path + '/') &&
+									!navLinks.some(
+										(other) =>
+											other.path !== link.path && location.pathname.startsWith(other.path) && other.path.length > link.path.length,
+									));
 							return (
 								<Link
 									key={link.name}

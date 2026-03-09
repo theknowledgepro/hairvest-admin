@@ -14,6 +14,7 @@ export interface StaffRole {
 	title: string;
 	summary?: string;
 	permissions: string[];
+	updatedAt: string;
 	createdAt: string;
 }
 

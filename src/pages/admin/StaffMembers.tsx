@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createMemberSchema, type CreateMemberFormValues } from '../../lib/schemas/staffMembers.schemas';
-import { useStaffMembersQuery, useCreateMemberMutation, useUpdateMemberMutation, useDeleteMemberMutation } from '../../hooks/useStaffMembers';
+import {
+	useStaffMembersQuery,
+	useCreateMemberMutation,
+	useUpdateMemberMutation,
+	useDeleteMemberMutation,
+	useToggleStaffSuspensionMutation,
+} from '../../hooks/useStaffMembers';
 import { useStaffRolesQuery } from '../../hooks/useStaffRoles';
 import type { StaffMember } from '../../api/staffMembers';
 import type { StaffRole } from '../../api/staffRoles';
@@ -22,7 +28,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
-import { Plus, Users, Loader2, MoreHorizontal, Trash2, Edit, ChevronsUpDown, Check } from 'lucide-react';
+import { Plus, Users, Loader2, MoreHorizontal, Trash2, Edit, ChevronsUpDown, Check, Image as ImageIcon } from 'lucide-react';
+import { formatDate } from '@/lib/formatDate';
+import { getCloudFileURL } from '../../lib/utils';
+import { MAX_IMAGE_MB } from '@/config';
+import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 
 type DialogMode = 'create' | 'edit' | null;
 
@@ -46,13 +57,13 @@ const RoleMultiSelect: React.FC<{
 	const selectedLabels = roles.filter((r) => selectedIds.includes(r.id)).map((r) => r.title);
 
 	return (
-		<div className='space-y-2'>
+		<div className='w-full space-y-2'>
 			<Label className='text-neutral-300'>Roles</Label>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<button
 						type='button'
-						className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm bg-neutral-800 text-white transition-colors ${
+						className={`cursor-pointer flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm bg-neutral-800 text-white transition-colors ${
 							error ? 'border-red-500' : 'border-neutral-700'
 						} hover:border-neutral-500`}>
 						<span className={selectedLabels.length === 0 ? 'text-neutral-500' : ''}>
@@ -61,7 +72,7 @@ const RoleMultiSelect: React.FC<{
 						<ChevronsUpDown className='h-4 w-4 text-neutral-400 shrink-0 ml-2' />
 					</button>
 				</PopoverTrigger>
-				<PopoverContent className='w-full min-w-[280px] p-1 bg-neutral-800 border-neutral-700 shadow-xl' align='start'>
+				<PopoverContent className='w-full min-w-[300px] p-1 bg-neutral-800 border-neutral-700 shadow-xl' align='start'>
 					{roles.length === 0 ?
 						<p className='text-neutral-500 text-sm px-3 py-2'>No roles available</p>
 					:	roles.map((role) => {
@@ -96,6 +107,9 @@ const RoleMultiSelect: React.FC<{
 export const StaffMembers: React.FC = () => {
 	const [dialogMode, setDialogMode] = useState<DialogMode>(null);
 	const [selectedMember, setSelectedMember] = useState<StaffMember | null>(null);
+	const [avatarFile, setAvatarFile] = useState<File | null>(null);
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+	const isEdit = dialogMode === 'edit';
 
 	const { data: membersResponse, isLoading } = useStaffMembersQuery();
 	const { data: rolesResponse } = useStaffRolesQuery();
@@ -105,11 +119,14 @@ export const StaffMembers: React.FC = () => {
 	const closeDialog = () => {
 		setDialogMode(null);
 		setSelectedMember(null);
+		setAvatarFile(null);
+		setAvatarPreview(null);
 		reset();
 	};
 
 	const { mutate: createMember, isPending: isCreating } = useCreateMemberMutation(closeDialog);
 	const { mutate: updateMember, isPending: isUpdating } = useUpdateMemberMutation(closeDialog);
+	const { mutate: toggleSuspension, isPending: isToggling } = useToggleStaffSuspensionMutation();
 	const { mutate: deleteMember } = useDeleteMemberMutation();
 
 	const {
@@ -127,20 +144,40 @@ export const StaffMembers: React.FC = () => {
 	const watchedRoles = watch('roles');
 
 	const openCreate = () => {
-		reset({ firstName: '', lastName: '', email: '', phone: '', roles: [] });
+		setAvatarFile(null);
+		setAvatarPreview(null);
+		reset({ firstName: '', lastName: '', email: '', phone: '', roles: [], suspended: false });
 		setDialogMode('create');
 	};
 
 	const openEdit = (member: StaffMember) => {
 		setSelectedMember(member);
+		setAvatarFile(null);
+		setAvatarPreview(member.avatar ? (getCloudFileURL(member.avatar.preview) ?? null) : null);
 		reset({
 			firstName: member.firstName,
 			lastName: member.lastName,
 			email: member.email,
-			phone: member.phone?.international ?? '',
+			phone: member.phone?.international?.split(' ')?.join('') ?? '',
 			roles: member.roles?.map((r) => r?.id) ?? [],
+			suspended: member.suspended,
 		});
 		setDialogMode('edit');
+	};
+
+	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+				return toast.error(`"${file.name}" exceeds the ${MAX_IMAGE_MB}MB image size limit.`);
+			}
+			setAvatarFile(file);
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setAvatarPreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
 	};
 
 	const onSubmit = (data: CreateMemberFormValues) => {
@@ -156,11 +193,22 @@ export const StaffMembers: React.FC = () => {
 			return;
 		}
 
-		if (dialogMode === 'create') {
-			createMember(data);
-		} else if (dialogMode === 'edit' && selectedMember) {
-			updateMember({ id: selectedMember.id, data });
+		const formData = new FormData();
+		formData.append('firstName', data.firstName);
+		formData.append('lastName', data.lastName);
+		if (data.email) formData.append('email', data.email);
+		if (data.phone) formData.append('phone', data.phone);
+		if (data.password) formData.append('password', data.password);
+		if (data.suspended !== undefined) formData.append('suspended', data.suspended.toString());
+
+		data.roles.forEach((role) => formData.append('roles[]', role));
+
+		if (avatarFile) {
+			formData.append('avatar', avatarFile);
 		}
+
+		if (dialogMode === 'create') createMember(formData as any);
+		else if (isEdit && selectedMember) updateMember({ id: selectedMember.id, data: formData as any });
 	};
 
 	const getRoleNames = (roleIds: string[]) => {
@@ -188,9 +236,37 @@ export const StaffMembers: React.FC = () => {
 			<Dialog open={dialogMode !== null} onOpenChange={(open) => !open && closeDialog()}>
 				<DialogContent className='sm:max-w-[480px] bg-neutral-900 border-neutral-800 text-white'>
 					<DialogHeader>
-						<DialogTitle>{dialogMode === 'edit' ? 'Edit Staff Member' : 'Add New Staff Member'}</DialogTitle>
+						<DialogTitle>{isEdit ? 'Edit Staff Member' : 'Add New Staff Member'}</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleSubmit(onSubmit)} className='space-y-4 mt-4'>
+						{/* Avatar Upload */}
+						<div className='flex flex-col items-center justify-center mb-4'>
+							<div className='relative group cursor-pointer mb-2'>
+								<label htmlFor='avatar-upload' className='cursor-pointer block relative'>
+									<Avatar className='h-24 w-24 ring-2 ring-neutral-700/50 group-hover:ring-blue-500/50 transition-all'>
+										{avatarPreview ?
+											<img src={avatarPreview} alt='Avatar preview' className='h-full w-full object-cover' />
+										:	<AvatarFallback className='bg-neutral-800 text-neutral-400'>
+												<ImageIcon className='h-8 w-8 opacity-50' />
+											</AvatarFallback>
+										}
+									</Avatar>
+									<div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex flex-col items-center justify-center text-xs font-medium text-white'>
+										<Edit className='h-4 w-4 mb-1' />
+										<span>Change</span>
+									</div>
+								</label>
+								<input
+									id='avatar-upload'
+									type='file'
+									accept='image/jpeg, image/png, image/webp, image/gif'
+									className='hidden'
+									onChange={handleAvatarChange}
+								/>
+							</div>
+							<p className='text-xs text-neutral-500'>Max {MAX_IMAGE_MB}MB</p>
+						</div>
+
 						<div className='grid grid-cols-2 gap-4'>
 							<div className='space-y-2'>
 								<Label htmlFor='firstName' className='text-neutral-300'>
@@ -247,20 +323,22 @@ export const StaffMembers: React.FC = () => {
 							{errors.phone && <p className='text-xs text-red-400'>{errors.phone.message}</p>}
 						</div>
 
-						<div className='space-y-2'>
-							<div className='flex items-center justify-between'>
-								<Label htmlFor='password' className='text-neutral-300'>
-									Default Account Password
-								</Label>
+						{!isEdit && (
+							<div className='space-y-2'>
+								<div className='flex items-center justify-between'>
+									<Label htmlFor='password' className='text-neutral-300'>
+										Default Account Password
+									</Label>
+								</div>
+								<Input
+									id='password'
+									type='password'
+									{...register('password')}
+									className='bg-neutral-800/50 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:ring-blue-500'
+								/>
+								{errors.password && <p className='text-xs text-red-400'>{errors.password.message}</p>}
 							</div>
-							<Input
-								id='password'
-								type='password'
-								{...register('password')}
-								className='bg-neutral-800/50 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:ring-blue-500'
-							/>
-							{errors.password && <p className='text-xs text-red-400'>{errors.password.message}</p>}
-						</div>
+						)}
 
 						<RoleMultiSelect
 							roles={roles}
@@ -269,10 +347,10 @@ export const StaffMembers: React.FC = () => {
 							error={errors.roles?.message as string | undefined}
 						/>
 
-						<Button type='submit' disabled={isSubmitting} className='w-full bg-blue-600 hover:bg-blue-500'>
+						<Button type='submit' disabled={isSubmitting} className='w-full bg-blue-600 hover:bg-blue-500 text-white'>
 							{isSubmitting ?
-								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-							: dialogMode === 'edit' ?
+								<Loader2 className='mr-2 h-4 w-4 animate-spin text-white' />
+							: isEdit ?
 								'Update Member'
 							:	'Add Member'}
 						</Button>
@@ -280,7 +358,7 @@ export const StaffMembers: React.FC = () => {
 				</DialogContent>
 			</Dialog>
 
-			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur'>
+			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0'>
 				<CardContent className='p-0'>
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
@@ -290,6 +368,7 @@ export const StaffMembers: React.FC = () => {
 								<TableHead className='text-neutral-400'>Roles</TableHead>
 								<TableHead className='text-neutral-400'>Status</TableHead>
 								<TableHead className='text-neutral-400 text-right'>Actions</TableHead>
+								<TableHead className='text-neutral-400'>Created</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -302,7 +381,7 @@ export const StaffMembers: React.FC = () => {
 								</TableRow>
 							: members.length === 0 ?
 								<TableRow>
-									<TableCell colSpan={5} className='text-center py-10 text-neutral-500'>
+									<TableCell colSpan={6} className='text-center py-10 text-neutral-500'>
 										No members found. Add one to get started.
 									</TableCell>
 								</TableRow>
@@ -311,10 +390,13 @@ export const StaffMembers: React.FC = () => {
 										<TableCell className='font-medium text-white'>
 											<div className='flex items-center gap-3'>
 												<Avatar className='h-9 w-9 ring-1 ring-neutral-700'>
-													<AvatarFallback className='bg-neutral-800 text-blue-400 text-xs'>
-														{member.firstName[0]}
-														{member.lastName[0]}
-													</AvatarFallback>
+													{member.avatar?.thumbnail ?
+														<img src={getCloudFileURL(member.avatar.thumbnail)} alt='Avatar' className='object-cover' />
+													:	<AvatarFallback className='bg-neutral-800 text-blue-400 text-xs'>
+															{member.firstName[0]}
+															{member.lastName[0]}
+														</AvatarFallback>
+													}
 												</Avatar>
 												<div>
 													<p className='text-sm'>
@@ -339,14 +421,20 @@ export const StaffMembers: React.FC = () => {
 											</div>
 										</TableCell>
 										<TableCell>
-											<span
-												className={`px-2.5 py-1 text-xs rounded-full font-medium ${
-													member.status === 'ACTIVE' ?
-														'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-													:	'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
-												}`}>
-												{member.status}
-											</span>
+											<div className='flex items-center gap-3 w-max'>
+												<Switch
+													className='data-[state=checked]:bg-emerald-500! data-[state=unchecked]:bg-red-500!'
+													disabled={isToggling}
+													checked={!member.suspended} // active is checked, suspended is unchecked
+													onCheckedChange={() => toggleSuspension(member.id)}
+												/>
+												<span
+													className={`text-xs font-medium transition-colors ${
+														!member.suspended ? 'text-emerald-400' : 'text-red-400'
+													}`}>
+													{!member.suspended ? 'Active' : 'Suspended'}
+												</span>
+											</div>
 										</TableCell>
 										<TableCell className='text-right'>
 											<DropdownMenu>
@@ -365,12 +453,24 @@ export const StaffMembers: React.FC = () => {
 													</DropdownMenuItem>
 													<DropdownMenuSeparator className='bg-neutral-800' />
 													<DropdownMenuItem
-														onClick={() => deleteMember(member.id)}
+														onClick={() => {
+															if (confirm('Are you sure you want to delete this staff?')) {
+																deleteMember(member.id);
+															}
+														}}
 														className='hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-400 text-red-400 cursor-pointer'>
 														<Trash2 className='mr-2 h-4 w-4' /> Delete
 													</DropdownMenuItem>
 												</DropdownMenuContent>
 											</DropdownMenu>
+										</TableCell>
+										<TableCell>
+											<div className='flex flex-col gap-0.5'>
+												{member.createdAt && <span className='text-[14px] text-neutral-200'>{formatDate(member.createdAt)}</span>}
+												{member.updatedAt && member.updatedAt !== member.createdAt && (
+													<span className='text-[13px] text-neutral-400'>Edited {formatDate(member.updatedAt)}</span>
+												)}
+											</div>
 										</TableCell>
 									</TableRow>
 								))
