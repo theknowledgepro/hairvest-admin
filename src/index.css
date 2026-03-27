@@ -135,6 +135,15 @@
 	}
 }
 
+@layer utilities {
+	.text-xs {
+		font-size: 14px;
+	}
+	.text-sm {
+		font-size: 15px;
+	}
+}
+
 /* ── Custom Scrollbar ──────────────────────────────────────── */
 
 /* Firefox */

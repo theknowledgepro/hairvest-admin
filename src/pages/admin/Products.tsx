@@ -37,7 +37,7 @@ import {
 	Flame,
 	Search,
 } from 'lucide-react';
-import { getCloudFileURL } from '../../lib/utils';
+import { getCloudFileURL, cn } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { useAuthStore } from '../../store/useAuthStore';
 import { formatDate } from '@/lib/formatDate';
@@ -62,8 +62,8 @@ export const Products: React.FC = () => {
 	const totalResults = productsResponse?.data?.totalCount ?? 0;
 
 	// Computations for video upload status alerts
-	const processingProducts = products.filter((p) => p.videosProcessingId);
-	const failedVideoProducts = products.filter((p) => p.videosProcessingError);
+	const processingProducts = products.filter((p: any) => p.videosProcessingId);
+	const failedVideoProducts = products.filter((p: any) => p.videosProcessingError);
 
 	const { mutate: deleteProduct } = useDeleteProductMutation();
 	const { mutate: toggleAvailability, isPending: isToggling } = useToggleProductAvailabilityMutation();
@@ -116,7 +116,7 @@ export const Products: React.FC = () => {
 				</div>
 			)}
 
-			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0 space-y-0 gap-0'>
+			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0 gap-0'>
 				<div className='p-4 border-b border-neutral-800 flex items-center justify-between'>
 					<div className='relative w-full max-w-lg'>
 						<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500' />
@@ -133,7 +133,7 @@ export const Products: React.FC = () => {
 					</div>
 				</div>
 
-				<CardContent className='p-0'>
+				<CardContent className='p-0 text-white font-sans'>
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
@@ -151,19 +151,22 @@ export const Products: React.FC = () => {
 						<TableBody>
 							{isLoading ?
 								<TableRow>
-									<TableCell colSpan={8} className='text-center py-10 text-neutral-500'>
+									<TableCell colSpan={9} className='text-center py-10 text-neutral-500'>
 										<Loader2 className='h-6 w-6 animate-spin mx-auto mb-2 text-blue-400' />
 										Loading products...
 									</TableCell>
 								</TableRow>
 							: products.length === 0 ?
 								<TableRow>
-									<TableCell colSpan={8} className='text-center py-10 text-neutral-500'>
+									<TableCell colSpan={9} className='text-center py-10 text-neutral-500'>
 										No products found. Add one to get started.
 									</TableCell>
 								</TableRow>
-							:	products.map((product) => (
-									<TableRow key={product.id} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+							:	products.map((product: any) => (
+									<TableRow
+										key={product.id}
+										className='border-neutral-800 hover:bg-neutral-800/30 transition-colors cursor-pointer group/row'
+										onClick={() => navigate(`${APP_ROUTES.PRODUCTS}/${product.key}`)}>
 										<TableCell>
 											<div className='h-12 w-12 rounded-lg bg-neutral-800 border-neutral-700 overflow-hidden relative group'>
 												{product.images && product.images.length > 0 ?
@@ -248,7 +251,7 @@ export const Products: React.FC = () => {
 											</div>
 										</TableCell>
 										<TableCell>
-											<span className={`text-sm ${product.availableStock < 5 ? 'text-amber-400' : 'text-neutral-400'}`}>
+											<span className={cn('text-sm', product.availableStock < 5 ? 'text-amber-400' : 'text-neutral-400')}>
 												{product.availableStock}
 											</span>
 										</TableCell>
@@ -259,18 +262,20 @@ export const Products: React.FC = () => {
 													disabled={isToggling}
 													checked={product.isAvailable}
 													onCheckedChange={() => toggleAvailability(product.key)}
+													onClick={(e) => e.stopPropagation()}
 												/>
 												<span
-													className={`text-xs font-medium transition-colors ${
-														product.isAvailable ? 'text-emerald-400' : 'text-neutral-500'
-													}`}>
+													className={cn(
+														'text-xs font-medium transition-colors',
+														product.isAvailable ? 'text-emerald-400' : 'text-neutral-500',
+													)}>
 													{product.isAvailable ? 'Active' : 'Hidden'}
 												</span>
 											</div>
 										</TableCell>
 										<TableCell className='text-right'>
 											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
+												<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
 													<Button variant='ghost' className='h-8 w-8 p-0 text-neutral-400 hover:text-white hover:bg-neutral-800'>
 														<span className='sr-only'>Open menu</span>
 														<MoreHorizontal className='h-4 w-4' />
@@ -279,22 +284,37 @@ export const Products: React.FC = () => {
 												<DropdownMenuContent align='end' className='bg-neutral-900 border-neutral-800 text-white'>
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuItem
-														onClick={() => navigate(`${APP_ROUTES.PRODUCTS}/edit/${product.key}`)}
+														onClick={(e) => {
+															e.stopPropagation();
+															navigate(`${APP_ROUTES.PRODUCTS}/${product.key}`);
+														}}
+														className='hover:bg-neutral-800 focus:bg-neutral-800 focus:text-white cursor-pointer'>
+														<Package className='mr-2 h-4 w-4 text-blue-400' /> View Details
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={(e) => {
+															e.stopPropagation();
+															navigate(`${APP_ROUTES.PRODUCTS}/edit/${product.key}`);
+														}}
 														className='hover:bg-neutral-800 focus:bg-neutral-800 focus:text-white cursor-pointer'>
 														<Edit className='mr-2 h-4 w-4 text-blue-400' /> Edit Product
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() => toggleFlashSale(product.key)}
+														onClick={(e) => {
+															e.stopPropagation();
+															toggleFlashSale(product.key);
+														}}
 														className='hover:bg-neutral-800 focus:bg-neutral-800 focus:text-white cursor-pointer'>
 														<Flame
-															size={24}
-															className={`mr-2 ${product.isFlashSale ? 'text-yellow-400' : 'text-neutral-500'}`}
+															size={16}
+															className={cn('mr-2', product.isFlashSale ? 'text-yellow-400' : 'text-neutral-500')}
 														/>
 														{product.isFlashSale ? 'Remove from Flash Sale' : 'Add to Flash Sale'}
 													</DropdownMenuItem>
 													<DropdownMenuSeparator className='bg-neutral-800' />
 													<DropdownMenuItem
-														onClick={() => {
+														onClick={(e) => {
+															e.stopPropagation();
 															if (confirm('Are you sure you want to delete this product?')) {
 																deleteProduct(product.key);
 															}
@@ -308,10 +328,12 @@ export const Products: React.FC = () => {
 										<TableCell>
 											<div className='flex flex-col gap-0.5'>
 												{product.createdAt && (
-													<span className='text-[14px] text-neutral-200'>{formatDate(product.createdAt)}</span>
+													<span className='text-[14px] text-neutral-200 text-nowrap'>{formatDate(product.createdAt)}</span>
 												)}
 												{product.updatedAt && product.updatedAt !== product.createdAt && (
-													<span className='text-[13px] text-neutral-400'>Edited {formatDate(product.updatedAt)}</span>
+													<span className='text-[13px] text-neutral-400 text-nowrap'>
+														Edited {formatDate(product.updatedAt)}
+													</span>
 												)}
 											</div>
 										</TableCell>

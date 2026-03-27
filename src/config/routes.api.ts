@@ -12,6 +12,9 @@ export const API_ROUTES = {
 
 	PRODUCT_CATEGORIES: '/products/categories',
 	PRODUCTS: '/products',
+	REVIEWS: '/reviews',
+	ORDERS: '/orders',
+	CARTS: '/carts',
 
 	CUSTOMERS: '/customers',
 	CUSTOMER_DETAILS: (id: string) => `/customers/${id}`,

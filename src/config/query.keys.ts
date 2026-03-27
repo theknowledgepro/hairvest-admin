@@ -11,4 +11,7 @@ export const queryKeys = {
 
 	customers: ['customers'],
 	customerDetails: (id: string) => ['customerDetails', id],
+
+	reviews: ['reviews'],
+	orders: ['orders'],
 };

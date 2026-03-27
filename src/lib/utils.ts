@@ -12,3 +12,6 @@ export const getCloudFileURL = (url: string | undefined) => {
 	else if (url && url.startsWith('https')) return url;
 	else return undefined;
 };
+
+export const getFullName = (user: { firstName?: string; lastName?: string; otherNames?: string; email?: string }) =>
+	[user.firstName, user.otherNames, user.lastName].filter(Boolean).join(' ') || user?.email;

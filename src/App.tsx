@@ -15,6 +15,9 @@ import { Products } from './pages/admin/Products';
 import { ProductForm } from './pages/admin/ProductForm';
 import { Customers } from './pages/admin/Customers';
 import { CustomerDetails } from './pages/admin/CustomerDetails';
+import { ProductDetails } from './pages/admin/ProductDetails';
+import { Reviews } from './pages/admin/Reviews';
+import { ReviewDetails } from './pages/admin/ReviewDetails';
 
 const queryClient = new QueryClient();
 
@@ -43,9 +46,14 @@ function App() {
 							</Route>
 							<Route path='products'>
 								<Route index element={<Products />} />
+								<Route path=':id' element={<ProductDetails />} />
 								<Route path='categories' element={<ProductCategories />} />
 								<Route path='new' element={<ProductForm />} />
 								<Route path='edit/:id' element={<ProductForm />} />
+							</Route>
+							<Route path='reviews'>
+								<Route index element={<Reviews />} />
+								<Route path=':id' element={<ReviewDetails />} />
 							</Route>
 						</Route>
 

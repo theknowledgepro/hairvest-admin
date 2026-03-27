@@ -5,14 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Loader2, ArrowLeft, ShieldAlert, MapPin, Mail, Phone, Calendar, History, ShoppingCart, Activity, UserSearch } from 'lucide-react';
-import { getCloudFileURL } from '../../lib/utils';
+import { Loader2, ArrowLeft, ShieldAlert, MapPin, Mail, Phone, Calendar, History, UserSearch, User2Icon } from 'lucide-react';
+import { getCloudFileURL, getFullName } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
+import { CustomerCart } from '../../components/admin/customer/CustomerCart';
+import { CustomerAddressList } from '../../components/admin/customer/CustomerAddressList';
+import { CustomerCardList } from '../../components/admin/customer/CustomerCardList';
+import { ProfileEditModal } from '../../components/admin/customer/ProfileEditModal';
+import { useState } from 'react';
 
 export const CustomerDetails: React.FC = () => {
 	const navigate = useNavigate();
 	const { id } = useParams();
+	const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
 	const { data: customerResponse, isLoading } = useCustomerDetailsQuery(id);
 	const customer = customerResponse?.data?.customer;
@@ -45,7 +51,7 @@ export const CustomerDetails: React.FC = () => {
 		<div className='max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500'>
 			<div className='flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8'>
 				<div className='flex items-center gap-4'>
-					<Button variant='ghost' size='icon' onClick={() => navigate(APP_ROUTES.CUSTOMERS)} className='text-neutral-400 hover:text-white'>
+					<Button variant='ghost' size='icon' onClick={() => navigate(-1)} className='text-neutral-400 hover:text-white'>
 						<ArrowLeft className='h-5 w-5' />
 					</Button>
 					<div>
@@ -66,7 +72,7 @@ export const CustomerDetails: React.FC = () => {
 			<div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
 				{/* Left Sidebar - Personal Info */}
 				<div className='space-y-8'>
-					<Card className='bg-neutral-900/50 border-neutral-800 overflow-hidden'>
+					<Card className='bg-neutral-900/50 border-neutral-800 overflow-hidden p-0'>
 						<div className='h-24 bg-gradient-to-r from-blue-900/40 to-blue-600/20'></div>
 						<CardContent className='px-6 pb-6 pt-0 relative'>
 							<div className='flex flex-col items-center -mt-12 mb-4'>
@@ -74,15 +80,19 @@ export const CustomerDetails: React.FC = () => {
 									{customer.avatar?.thumbnail ?
 										<img src={getCloudFileURL(customer.avatar.original)} alt='Avatar' className='object-cover' />
 									:	<AvatarFallback className='text-2xl text-blue-400 font-semibold uppercase'>
-											{customer.firstName?.[0] || 'U'}
-											{customer.lastName?.[0] || 'U'}
+											{getFullName(customer)?.[0] || 'U'}
 										</AvatarFallback>
 									}
 								</Avatar>
-								<h3 className='text-xl font-bold text-white mt-3'>
-									{customer.firstName || 'Unknown'} {customer.lastName || 'User'}
-								</h3>
-								<p className='text-sm text-neutral-400 font-mono mt-1'>ID: {customer.key}</p>
+								<h3 className='text-xl font-bold text-white mt-3'>{getFullName(customer)}</h3>
+								<p className='text-sm text-neutral-400 font-mono mt-1 mb-3'>ID: {customer.key}</p>
+								<Button
+									size='sm'
+									variant='outline'
+									className='h-8 border-neutral-700 text-white hover:bg-neutral-800'
+									onClick={() => setIsEditProfileOpen(true)}>
+									Edit Profile
+								</Button>
 							</div>
 
 							<div className='space-y-4 pt-4 border-t border-neutral-800/60'>
@@ -101,7 +111,7 @@ export const CustomerDetails: React.FC = () => {
 									</div>
 								</div>
 								<div className='flex items-start gap-3 text-sm'>
-									<MapPin className='h-4 w-4 text-neutral-500 mt-0.5' />
+									<User2Icon className='h-4 w-4 text-neutral-500 mt-0.5' />
 									<div>
 										<p className='font-medium text-neutral-300 capitalize'>{customer.gender || 'Not specified'}</p>
 										<p className='text-xs text-neutral-500'>Gender</p>
@@ -112,6 +122,15 @@ export const CustomerDetails: React.FC = () => {
 									<div>
 										<p className='font-medium text-neutral-300'>{formatDate(customer.createdAt)}</p>
 										<p className='text-xs text-neutral-500'>Joined (via {customer.signUpMethod || 'Email'})</p>
+									</div>
+								</div>
+								<div className='flex items-start gap-3 text-sm'>
+									<MapPin className='h-4 w-4 text-neutral-500 mt-0.5' />
+									<div>
+										<p className='font-medium text-neutral-300 capitalize'>
+											{customer.state?.label || 'N/A'}, {customer.country?.label || 'N/A'}
+										</p>
+										<p className='text-xs text-neutral-500'>Location</p>
 									</div>
 								</div>
 							</div>
@@ -162,35 +181,18 @@ export const CustomerDetails: React.FC = () => {
 						</CardContent>
 					</Card>
 
-					{/* Active Cart Placeholder */}
-					<Card className='bg-neutral-900/50 border-neutral-800'>
-						<CardHeader className='border-b border-neutral-800 pb-4'>
-							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>
-								<ShoppingCart className='h-5 w-5 text-blue-400' /> Active Cart
-							</CardTitle>
-						</CardHeader>
-						<CardContent className='p-10 flex flex-col items-center justify-center text-neutral-500'>
-							<ShoppingCart className='h-10 w-10 text-neutral-700 mb-4' />
-							<p className='font-medium text-neutral-300'>Cart tracking coming soon</p>
-							<p className='text-sm mt-1 text-center max-w-sm'>Observe what the customer currently has in their shopping cart.</p>
-						</CardContent>
-					</Card>
+					{/* Active Cart */}
+					<CustomerCart customerId={customer.key} />
 
-					{/* Activity Placeholder */}
-					<Card className='bg-neutral-900/50 border-neutral-800'>
-						<CardHeader className='border-b border-neutral-800 pb-4'>
-							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>
-								<Activity className='h-5 w-5 text-blue-400' /> Recent Activity Logs
-							</CardTitle>
-						</CardHeader>
-						<CardContent className='p-10 flex flex-col items-center justify-center text-neutral-500'>
-							<Activity className='h-10 w-10 text-neutral-700 mb-4' />
-							<p className='font-medium text-neutral-300'>Activity tracking coming soon</p>
-							<p className='text-sm mt-1 text-center max-w-sm'>View a timeline of logins, profile updates, and shipping adjustments.</p>
-						</CardContent>
-					</Card>
+					{/* Addresses */}
+					<CustomerAddressList customerId={customer.key} />
+
+					{/* Payment Cards */}
+					<CustomerCardList customerId={customer.key} />
 				</div>
 			</div>
+
+			{isEditProfileOpen && <ProfileEditModal customer={customer} onClose={() => setIsEditProfileOpen(false)} />}
 		</div>
 	);
 };

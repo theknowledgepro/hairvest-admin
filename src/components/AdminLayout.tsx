@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { LayoutDashboard, Users, LogOut, Search, Menu, X, Layers, Package, Contact, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, Search, Menu, X, Layers, Package, Contact, ShieldCheck, Star } from 'lucide-react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
@@ -26,6 +26,7 @@ export const AdminLayout: React.FC = () => {
 		{ name: 'My Customers', path: APP_ROUTES.CUSTOMERS, icon: Users },
 		{ name: 'Product Categories', path: APP_ROUTES.CATEGORIES, icon: Layers },
 		{ name: 'Products', path: APP_ROUTES.PRODUCTS, icon: Package },
+		{ name: 'Reviews', path: APP_ROUTES.REVIEWS, icon: Star },
 		{ name: 'Staff Members', path: APP_ROUTES.MEMBERS, icon: Contact },
 		{ name: 'Roles & Permissions', path: APP_ROUTES.ROLES, icon: ShieldCheck },
 	];
