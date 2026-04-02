@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { History } from 'lucide-react';
 
-export const CustomerOrdersList = ({ customerId }: { customerId: string }) => {
+export const CustomerOrdersList = ({}: { customerId: string }) => {
 	return (
 		<Card className='bg-neutral-900/50 border-neutral-800'>
 			<CardHeader className='border-b border-neutral-800 pb-4'>
