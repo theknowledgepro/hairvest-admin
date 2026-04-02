@@ -15,18 +15,22 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
-import { Users, Loader2, MoreHorizontal, UserSearch, ShieldAlert, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Loader2, MoreHorizontal, UserSearch, ShieldAlert, ShieldCheck, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { getCloudFileURL } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
+import { useDebounce } from 'use-debounce';
+import { Input } from '@/components/ui/input';
 
 export const Customers: React.FC = () => {
 	const navigate = useNavigate();
 
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(10);
+	const [searchInput, setSearchInput] = useState('');
+	const [debouncedSearch] = useDebounce(searchInput, 500);
 
-	const { data: customersResponse, isLoading } = useCustomersQuery({ page, limit });
+	const { data: customersResponse, isLoading } = useCustomersQuery({ page, limit, search: debouncedSearch });
 	const customers = customersResponse?.data?.results ?? [];
 	const totalPages = customersResponse?.data?.totalPages ?? 1;
 	const totalResults = customersResponse?.data?.totalCount ?? 0;
@@ -44,7 +48,22 @@ export const Customers: React.FC = () => {
 				</div>
 			</div>
 
-			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0'>
+			<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur p-0 gap-0'>
+				<div className='p-4 border-b border-neutral-800 flex items-center justify-between'>
+					<div className='relative w-full max-w-lg'>
+						<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500' />
+						<Input
+							type='text'
+							placeholder='Search users by name, email, or phone...'
+							className='pl-9 bg-neutral-900 border-neutral-700 text-white w-full'
+							value={searchInput}
+							onChange={(e) => {
+								setSearchInput(e.target.value);
+								setPage(1); // Reset to first page on new search
+							}}
+						/>
+					</div>
+				</div>
 				<CardContent className='p-0'>
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
@@ -73,7 +92,10 @@ export const Customers: React.FC = () => {
 									</TableCell>
 								</TableRow>
 							:	customers.map((customer) => (
-									<TableRow key={customer.key} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+									<TableRow
+										key={customer.key}
+										onClick={() => navigate(`${APP_ROUTES.CUSTOMERS}/${customer.key}`)}
+										className='border-neutral-800 hover:bg-neutral-800/30 transition-colors cursor-pointer'>
 										<TableCell className='font-medium text-white'>
 											<div className='flex items-center gap-3'>
 												<Avatar className='h-9 w-9 ring-1 ring-neutral-700'>
@@ -114,6 +136,7 @@ export const Customers: React.FC = () => {
 													disabled={isToggling}
 													checked={!customer.suspended} // active is checked, suspended is unchecked
 													onCheckedChange={() => toggleSuspension(customer.key)}
+													onClick={(e) => e.stopPropagation()}
 												/>
 												<span
 													className={`text-xs font-medium transition-colors ${
@@ -125,7 +148,7 @@ export const Customers: React.FC = () => {
 										</TableCell>
 										<TableCell className='text-right'>
 											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
+												<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
 													<Button variant='ghost' className='h-8 w-8 p-0 text-neutral-400 hover:text-white hover:bg-neutral-800'>
 														<span className='sr-only'>Open menu</span>
 														<MoreHorizontal className='h-4 w-4' />
@@ -134,13 +157,17 @@ export const Customers: React.FC = () => {
 												<DropdownMenuContent align='end' className='bg-neutral-900 border-neutral-800 text-white'>
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuItem
-														onClick={() => navigate(`${APP_ROUTES.CUSTOMERS}/${customer.key}`)}
+														onClick={(e) => {
+															e.stopPropagation();
+															navigate(`${APP_ROUTES.CUSTOMERS}/${customer.key}`);
+														}}
 														className='hover:bg-neutral-800 focus:bg-neutral-800 focus:text-white cursor-pointer'>
 														<UserSearch className='mr-2 h-4 w-4 text-blue-400' /> View Details
 													</DropdownMenuItem>
 													<DropdownMenuSeparator className='bg-neutral-800' />
 													<DropdownMenuItem
-														onClick={() => {
+														onClick={(e) => {
+															e.stopPropagation();
 															if (
 																confirm(
 																	`Are you sure you want to ${customer.suspended ? 'restore' : 'suspend'} this customer?`,

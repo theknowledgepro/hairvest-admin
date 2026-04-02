@@ -7,8 +7,14 @@ export interface Customer {
 	key: string;
 	firstName: string;
 	lastName: string;
+	otherNames: string;
 	email: string;
 	phone?: {
+		international: string;
+		national: string;
+		uri: string;
+	};
+	altPhone?: {
 		international: string;
 		national: string;
 		uri: string;
@@ -16,11 +22,43 @@ export interface Customer {
 	avatar?: ImageType;
 	gender: string;
 	signUpMethod: string;
+	headSizes?: string[];
+	hairLengths?: string[];
+	hairPatterns?: string[];
 	country: { label: string; value: string };
 	state: { label: string; value: string };
 	suspended: boolean;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface CustomerAddress {
+	key: string;
+	firstName: string;
+	lastName: string;
+	phone: {
+		international: string;
+		national: string;
+		uri: string;
+	};
+	addressLine1: string;
+	addressLine2?: string;
+	apartment?: string;
+	city: string;
+	state: { label: string; value: string };
+	country: { label: string; value: string };
+	zipCode: string;
+	isDefault: boolean;
+}
+
+export interface CustomerCard {
+	key: string;
+	cardName: string;
+	cardNumber: string;
+	brand: string;
+	expiryMonth: string;
+	expiryYear: string;
+	isDefault: boolean;
 }
 
 export const customersApi = {
@@ -50,15 +88,15 @@ export const customersApi = {
 	},
 
 	// Addresses
-	getAddresses: async (customerId: string): Promise<BaseAPIResponse & { data: { results: any[] } }> => {
+	getAddresses: async (customerId: string): Promise<BaseAPIResponse & { data: { results: CustomerAddress[] } }> => {
 		const response = await apiClient.get(`/addresses/customer/${customerId}`); // Adjust URL based on my route setup
 		return response.data;
 	},
-	addAddress: async (customerId: string, data: any): Promise<BaseAPIResponse & { data: { address: any } }> => {
+	addAddress: async (customerId: string, data: any): Promise<BaseAPIResponse & { data: { address: CustomerAddress } }> => {
 		const response = await apiClient.post(`/addresses/customer/${customerId}`, data);
 		return response.data;
 	},
-	updateAddress: async (addressId: string, data: any): Promise<BaseAPIResponse & { data: { address: any } }> => {
+	updateAddress: async (addressId: string, data: any): Promise<BaseAPIResponse & { data: { address: CustomerAddress } }> => {
 		const response = await apiClient.patch(`/addresses/${addressId}`, data);
 		return response.data;
 	},

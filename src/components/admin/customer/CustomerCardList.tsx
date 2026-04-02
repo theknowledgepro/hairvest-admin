@@ -1,21 +1,16 @@
-import React, { useState } from 'react';
-import { CreditCard, Plus, Trash2, Edit, Loader2 } from 'lucide-react';
+import { CreditCard, Trash2, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCustomerCardsQuery, useDeleteCardMutation } from '@/hooks/useCustomers';
-import { CardModal } from './CardModal';
 
 interface CustomerCardListProps {
 	customerId: string;
 }
 
-export const CustomerCardList: React.FC<CustomerCardListProps> = ({ customerId }) => {
+export const CustomerCardList = ({ customerId }: CustomerCardListProps) => {
 	const { data: response, isLoading } = useCustomerCardsQuery(customerId);
-	const cards = response?.data?.results || [];
 	const { mutate: deleteCard, isPending: isDeleting } = useDeleteCardMutation(customerId);
-
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [editingCard, setEditingCard] = useState<any>(null);
+	const cards = response?.data?.results || [];
 
 	return (
 		<Card className='bg-neutral-900/50 border-neutral-800'>
@@ -23,28 +18,18 @@ export const CustomerCardList: React.FC<CustomerCardListProps> = ({ customerId }
 				<CardTitle className='text-lg font-semibold text-white flex items-center gap-2 m-0'>
 					<CreditCard className='h-5 w-5 text-blue-400' /> Payment Cards ({cards.length})
 				</CardTitle>
-				<Button
-					size='sm'
-					className='bg-blue-600 hover:bg-blue-500 text-white'
-					onClick={() => {
-						setEditingCard(null);
-						setIsModalOpen(true);
-					}}>
-					<Plus className='h-4 w-4 mr-2' /> Add
-				</Button>
 			</CardHeader>
 			<CardContent className='p-0'>
-				{isLoading ? (
+				{isLoading ?
 					<div className='p-12 flex flex-col items-center justify-center text-neutral-500'>
 						<Loader2 className='h-8 w-8 animate-spin text-blue-500' />
 					</div>
-				) : cards.length === 0 ? (
+				: cards.length === 0 ?
 					<div className='p-10 flex flex-col items-center justify-center text-neutral-500'>
 						<CreditCard className='h-10 w-10 text-neutral-700 mb-4' />
 						<p className='font-medium text-neutral-300'>No cards found</p>
 					</div>
-				) : (
-					<div className='divide-y divide-neutral-800'>
+				:	<div className='divide-y divide-neutral-800'>
 						{cards.map((card: any) => (
 							<div key={card.key} className='p-4 hover:bg-neutral-800/30 transition-colors flex justify-between items-center'>
 								<div className='flex items-center gap-4'>
@@ -69,16 +54,6 @@ export const CustomerCardList: React.FC<CustomerCardListProps> = ({ customerId }
 									<Button
 										variant='ghost'
 										size='icon'
-										className='h-8 w-8 text-neutral-400 hover:text-white'
-										onClick={() => {
-											setEditingCard(card);
-											setIsModalOpen(true);
-										}}>
-										<Edit className='h-4 w-4' />
-									</Button>
-									<Button
-										variant='ghost'
-										size='icon'
 										disabled={isDeleting}
 										className='h-8 w-8 text-neutral-400 hover:text-red-400 hover:bg-red-500/10'
 										onClick={() => confirm('Delete card?') && deleteCard(card.key)}>
@@ -88,16 +63,8 @@ export const CustomerCardList: React.FC<CustomerCardListProps> = ({ customerId }
 							</div>
 						))}
 					</div>
-				)}
+				}
 			</CardContent>
-
-			{isModalOpen && (
-				<CardModal
-					customerId={customerId}
-					card={editingCard}
-					onClose={() => setIsModalOpen(false)}
-				/>
-			)}
 		</Card>
 	);
 };

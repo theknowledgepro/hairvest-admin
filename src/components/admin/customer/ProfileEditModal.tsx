@@ -5,26 +5,27 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useForm, Controller } from 'react-hook-form';
 import { useUpdateCustomerMutation } from '@/hooks/useCustomers';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface ProfileEditModalProps {
-	customer: any;
 	onClose: () => void;
 }
 
-export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ customer, onClose }) => {
+export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ onClose }) => {
+	const user = useAuthStore((state) => state.user);
 	const { register, handleSubmit, control } = useForm({
 		defaultValues: {
-			firstName: customer.firstName,
-			lastName: customer.lastName,
-			phone: customer.phone?.international || '',
-			gender: customer.gender || '',
+			firstName: user?.firstName,
+			lastName: user?.lastName,
+			phone: user?.phone?.international || '',
+			gender: user?.gender || '',
 		},
 	});
 
 	const { mutate: updateProfile, isPending } = useUpdateCustomerMutation();
 
 	const onSubmit = (data: any) => {
-		updateProfile({ id: customer.key, data }, { onSuccess: onClose });
+		updateProfile({ id: user?.id as string, data }, { onSuccess: onClose });
 	};
 
 	return (
@@ -73,7 +74,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ customer, on
 					</div>
 
 					<div className='flex justify-end gap-2 pt-4'>
-						<Button type='button' variant='ghost' onClick={onClose} className='text-neutral-400 hover:text-white'>Cancel</Button>
+						<Button type='button' variant='ghost' onClick={onClose} className='text-neutral-400 hover:text-white'>
+							Cancel
+						</Button>
 						<Button type='submit' disabled={isPending} className='bg-blue-600 hover:bg-blue-500 text-white'>
 							{isPending ? 'Saving...' : 'Save Changes'}
 						</Button>

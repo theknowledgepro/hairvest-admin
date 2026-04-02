@@ -15,6 +15,13 @@ export interface User {
 	avatar: string;
 	memberRole: string;
 	businessId?: string;
+	firstName: string;
+	lastName: string;
+	phone: {
+		international: string;
+		national: string;
+	};
+	gender: string;
 }
 
 export interface ImageType {

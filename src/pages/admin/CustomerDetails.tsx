@@ -5,20 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Loader2, ArrowLeft, ShieldAlert, MapPin, Mail, Phone, Calendar, History, UserSearch, User2Icon } from 'lucide-react';
+import { Loader2, ArrowLeft, ShieldAlert, MapPin, Mail, Phone, Calendar, UserSearch, User2Icon, Ruler, Scissors, BrainCircuit, Contact2 } from 'lucide-react';
 import { getCloudFileURL, getFullName } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
 import { CustomerCart } from '../../components/admin/customer/CustomerCart';
 import { CustomerAddressList } from '../../components/admin/customer/CustomerAddressList';
 import { CustomerCardList } from '../../components/admin/customer/CustomerCardList';
-import { ProfileEditModal } from '../../components/admin/customer/ProfileEditModal';
-import { useState } from 'react';
+import { CustomerOrdersList } from '@/components/admin/customer/CustomerOrdersList';
 
 export const CustomerDetails: React.FC = () => {
 	const navigate = useNavigate();
 	const { id } = useParams();
-	const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
 	const { data: customerResponse, isLoading } = useCustomerDetailsQuery(id);
 	const customer = customerResponse?.data?.customer;
@@ -86,13 +84,6 @@ export const CustomerDetails: React.FC = () => {
 								</Avatar>
 								<h3 className='text-xl font-bold text-white mt-3'>{getFullName(customer)}</h3>
 								<p className='text-sm text-neutral-400 font-mono mt-1 mb-3'>ID: {customer.key}</p>
-								<Button
-									size='sm'
-									variant='outline'
-									className='h-8 border-neutral-700 text-white hover:bg-neutral-800'
-									onClick={() => setIsEditProfileOpen(true)}>
-									Edit Profile
-								</Button>
 							</div>
 
 							<div className='space-y-4 pt-4 border-t border-neutral-800/60'>
@@ -110,6 +101,15 @@ export const CustomerDetails: React.FC = () => {
 										<p className='text-xs text-neutral-500'>Phone Number</p>
 									</div>
 								</div>
+								{customer.altPhone?.international && (
+									<div className='flex items-start gap-3 text-sm'>
+										<Contact2 className='h-4 w-4 text-neutral-500 mt-0.5' />
+										<div>
+											<p className='font-medium text-neutral-300'>{customer.altPhone.international}</p>
+											<p className='text-xs text-neutral-500'>Alternate Phone</p>
+										</div>
+									</div>
+								)}
 								<div className='flex items-start gap-3 text-sm'>
 									<User2Icon className='h-4 w-4 text-neutral-500 mt-0.5' />
 									<div>
@@ -161,25 +161,73 @@ export const CustomerDetails: React.FC = () => {
 							</div>
 						</CardContent>
 					</Card>
+
+					{/* Measurements & Preferences */}
+					<Card className='bg-neutral-900/50 border-neutral-800'>
+						<CardHeader>
+							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>
+								Fitting & Measurements
+							</CardTitle>
+						</CardHeader>
+						<CardContent className='space-y-6'>
+							{/* Head Sizes */}
+							<div className='space-y-2'>
+								<div className='flex items-center gap-2 text-sm text-neutral-400'>
+									<Ruler className='h-4 w-4' />
+									<p className='font-medium'>Head Sizes</p>
+								</div>
+								<div className='flex flex-wrap gap-2'>
+									{customer.headSizes?.length ?
+										customer.headSizes.map((size: string, i: number) => (
+											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20'>
+												{size}
+											</span>
+										))
+									:	<p className='text-xs text-neutral-500'>None specified</p>}
+								</div>
+							</div>
+
+							{/* Hair Lengths */}
+							<div className='space-y-2'>
+								<div className='flex items-center gap-2 text-sm text-neutral-400'>
+									<Scissors className='h-4 w-4' />
+									<p className='font-medium'>Hair Lengths</p>
+								</div>
+								<div className='flex flex-wrap gap-2'>
+									{customer.hairLengths?.length ?
+										customer.hairLengths.map((length: string, i: number) => (
+											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'>
+												{length}
+											</span>
+										))
+									:	<p className='text-xs text-neutral-500'>None specified</p>}
+								</div>
+							</div>
+
+							{/* Hair Patterns */}
+							<div className='space-y-2'>
+								<div className='flex items-center gap-2 text-sm text-neutral-400'>
+									<BrainCircuit className='h-4 w-4' />
+									<p className='font-medium'>Hair Patterns</p>
+								</div>
+								<div className='flex flex-wrap gap-2'>
+									{customer.hairPatterns?.length ?
+										customer.hairPatterns.map((pattern: string, i: number) => (
+											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/20'>
+												{pattern}
+											</span>
+										))
+									:	<p className='text-xs text-neutral-500'>None specified</p>}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
 				</div>
 
 				{/* Right Main Content (Placeholders) */}
 				<div className='lg:col-span-2 space-y-6'>
 					{/* Orders Placeholder */}
-					<Card className='bg-neutral-900/50 border-neutral-800'>
-						<CardHeader className='border-b border-neutral-800 pb-4'>
-							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>
-								<History className='h-5 w-5 text-blue-400' /> Order History
-							</CardTitle>
-						</CardHeader>
-						<CardContent className='p-12 flex flex-col items-center justify-center text-neutral-500'>
-							<History className='h-10 w-10 text-neutral-700 mb-4' />
-							<p className='font-medium text-neutral-300'>Orders tracking coming soon</p>
-							<p className='text-sm mt-1 text-center max-w-sm'>
-								When the order management APIs are connected, this section will display purchases made by this customer.
-							</p>
-						</CardContent>
-					</Card>
+					<CustomerOrdersList customerId={customer.key} />
 
 					{/* Active Cart */}
 					<CustomerCart customerId={customer.key} />
@@ -191,8 +239,6 @@ export const CustomerDetails: React.FC = () => {
 					<CustomerCardList customerId={customer.key} />
 				</div>
 			</div>
-
-			{isEditProfileOpen && <ProfileEditModal customer={customer} onClose={() => setIsEditProfileOpen(false)} />}
 		</div>
 	);
 };
