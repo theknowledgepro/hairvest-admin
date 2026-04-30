@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCustomersQuery, useToggleCustomerSuspensionMutation } from '../../hooks/useCustomers';
-import { Card, CardContent, CardFooter } from '../../components/ui/card';
+import { TablePagination } from '../../components/TablePagination';
+import { Card, CardContent } from '../../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
-import { Users, Loader2, MoreHorizontal, UserSearch, ShieldAlert, ShieldCheck, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Users, Loader2, MoreHorizontal, UserSearch, ShieldAlert, ShieldCheck, Search } from 'lucide-react';
 import { getCloudFileURL } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
@@ -68,6 +68,7 @@ export const Customers: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400'>S/N</TableHead>
 								<TableHead className='text-neutral-400'>Customer</TableHead>
 								<TableHead className='text-neutral-400'>Contact</TableHead>
 								<TableHead className='text-neutral-400'>Gender</TableHead>
@@ -91,11 +92,12 @@ export const Customers: React.FC = () => {
 										No customers found. Share your store mobile app link to start getting sign-ups!
 									</TableCell>
 								</TableRow>
-							:	customers.map((customer) => (
+							:	customers.map((customer, index) => (
 									<TableRow
 										key={customer.key}
 										onClick={() => navigate(`${APP_ROUTES.CUSTOMERS}/${customer.key}`)}
 										className='border-neutral-800 hover:bg-neutral-800/30 transition-colors cursor-pointer'>
+										<TableCell className='text-neutral-500 font-medium text-xs'>{(page - 1) * limit + index + 1}</TableCell>
 										<TableCell className='font-medium text-white'>
 											<div className='flex items-center gap-3'>
 												<Avatar className='h-9 w-9 ring-1 ring-neutral-700'>
@@ -204,58 +206,14 @@ export const Customers: React.FC = () => {
 						</TableBody>
 					</Table>
 				</CardContent>
-				{customers.length > 0 && (
-					<CardFooter className='border-t border-neutral-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-4'>
-						<div className='flex items-center gap-6'>
-							<div className='flex items-center gap-2'>
-								<span className='text-sm text-neutral-400'>Rows per page:</span>
-								<Select
-									value={String(limit)}
-									onValueChange={(val) => {
-										setLimit(Number(val));
-										setPage(1);
-									}}>
-									<SelectTrigger className='w-max bg-neutral-800 border-neutral-700 text-white h-8 focus:ring-1 focus:ring-blue-500'>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent className='bg-neutral-900 border-neutral-800 text-white'>
-										{[10, 20, 50, 100].map((l) => (
-											<SelectItem key={l} value={String(l)} className='focus:bg-neutral-800 focus:text-white'>
-												{l}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<span className='text-sm text-neutral-500'>
-								Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of {totalResults}
-							</span>
-						</div>
-
-						<div className='flex items-center gap-2'>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page <= 1}
-								onClick={() => setPage((p) => Math.max(1, p - 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronLeft className='h-4 w-4' />
-							</Button>
-							<div className='flex items-center gap-1 px-2'>
-								<span className='text-sm font-medium text-white'>Page {page}</span>
-								<span className='text-sm text-neutral-500'>of {totalPages}</span>
-							</div>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page >= totalPages}
-								onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronRight className='h-4 w-4' />
-							</Button>
-						</div>
-					</CardFooter>
-				)}
+				<TablePagination
+					page={page}
+					limit={limit}
+					totalResults={totalResults}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					onLimitChange={setLimit}
+				/>
 			</Card>
 		</div>
 	);

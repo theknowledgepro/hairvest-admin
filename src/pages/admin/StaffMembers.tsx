@@ -363,6 +363,7 @@ export const StaffMembers: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400'>S/N</TableHead>
 								<TableHead className='text-neutral-400'>Member</TableHead>
 								<TableHead className='text-neutral-400'>Phone</TableHead>
 								<TableHead className='text-neutral-400'>Roles</TableHead>
@@ -385,8 +386,9 @@ export const StaffMembers: React.FC = () => {
 										No members found. Add one to get started.
 									</TableCell>
 								</TableRow>
-							:	members.map((member) => (
+							:	members.map((member, index) => (
 									<TableRow key={member.id} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+										<TableCell className='text-neutral-500 font-medium text-xs text-center'>{index + 1}</TableCell>
 										<TableCell className='font-medium text-white'>
 											<div className='flex items-center gap-3'>
 												<Avatar className='h-9 w-9 ring-1 ring-neutral-700'>

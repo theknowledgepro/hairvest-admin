@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useNavigate } from 'react-router-dom';
+import { TablePagination } from '../../components/TablePagination';
 import {
 	useProductsQuery,
 	useDeleteProductMutation,
 	useToggleProductAvailabilityMutation,
 	useToggleProductFlashSaleMutation,
 } from '../../hooks/useProducts';
-import { Card, CardContent, CardFooter } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -20,23 +21,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import {
-	Plus,
-	Package,
-	Loader2,
-	MoreHorizontal,
-	Trash2,
-	Edit,
-	ImageIcon,
-	PlayCircle,
-	ChevronLeft,
-	ChevronRight,
-	Video,
-	AlertCircle,
-	Flame,
-	Search,
-} from 'lucide-react';
+import { Plus, Package, Loader2, MoreHorizontal, Trash2, Edit, ImageIcon, PlayCircle, Video, AlertCircle, Flame, Search } from 'lucide-react';
 import { getCloudFileURL, cn } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -137,6 +122,7 @@ export const Products: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400'>S/N</TableHead>
 								<TableHead className='text-neutral-400 w-[100px]'>Preview</TableHead>
 								<TableHead className='text-neutral-400'>Product</TableHead>
 								<TableHead className='text-neutral-400'>Category</TableHead>
@@ -162,11 +148,12 @@ export const Products: React.FC = () => {
 										No products found. Add one to get started.
 									</TableCell>
 								</TableRow>
-							:	products.map((product: any) => (
+							:	products.map((product, index: number) => (
 									<TableRow
 										key={product.id}
 										className='border-neutral-800 hover:bg-neutral-800/30 transition-colors cursor-pointer group/row'
 										onClick={() => navigate(`${APP_ROUTES.PRODUCTS}/${product.key}`)}>
+										<TableCell className='text-neutral-500 font-medium text-xs'>{(page - 1) * limit + index + 1}</TableCell>
 										<TableCell>
 											<div className='h-12 w-12 rounded-lg bg-neutral-800 border-neutral-700 overflow-hidden relative group'>
 												{product.images && product.images.length > 0 ?
@@ -343,58 +330,14 @@ export const Products: React.FC = () => {
 						</TableBody>
 					</Table>
 				</CardContent>
-				{products.length > 0 && (
-					<CardFooter className='border-t border-neutral-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-4'>
-						<div className='flex items-center gap-6'>
-							<div className='flex items-center gap-2'>
-								<span className='text-sm text-neutral-400'>Rows per page:</span>
-								<Select
-									value={String(limit)}
-									onValueChange={(val) => {
-										setLimit(Number(val));
-										setPage(1);
-									}}>
-									<SelectTrigger className='w-max bg-neutral-800 border-neutral-700 text-white h-8 focus:ring-1 focus:ring-blue-500'>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent className='bg-neutral-900 border-neutral-800 text-white'>
-										{[10, 20, 50, 100].map((l) => (
-											<SelectItem key={l} value={String(l)} className='focus:bg-neutral-800 focus:text-white'>
-												{l}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<span className='text-sm text-neutral-500'>
-								Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of {totalResults}
-							</span>
-						</div>
-
-						<div className='flex items-center gap-2'>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page <= 1}
-								onClick={() => setPage((p) => Math.max(1, p - 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronLeft className='h-4 w-4' />
-							</Button>
-							<div className='flex items-center gap-1 px-2'>
-								<span className='text-sm font-medium text-white'>Page {page}</span>
-								<span className='text-sm text-neutral-500'>of {totalPages}</span>
-							</div>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page >= totalPages}
-								onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronRight className='h-4 w-4' />
-							</Button>
-						</div>
-					</CardFooter>
-				)}
+				<TablePagination
+					page={page}
+					limit={limit}
+					totalResults={totalResults}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					onLimitChange={setLimit}
+				/>
 			</Card>
 		</div>
 	);

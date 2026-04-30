@@ -1,7 +1,24 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { LayoutDashboard, Users, LogOut, Search, Menu, X, Layers, Package, Contact, ShieldCheck, Star } from 'lucide-react';
+import {
+	LayoutDashboard,
+	Users,
+	LogOut,
+	Search,
+	Menu,
+	X,
+	Layers,
+	Package,
+	Contact,
+	ShieldCheck,
+	Star,
+	ShoppingCart,
+	Heart,
+	ClipboardList,
+	ShoppingBag,
+	Wallet,
+} from 'lucide-react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Input } from './ui/input';
@@ -27,13 +44,18 @@ export const AdminLayout: React.FC = () => {
 		{ name: 'Product Categories', path: APP_ROUTES.CATEGORIES, icon: Layers },
 		{ name: 'Products', path: APP_ROUTES.PRODUCTS, icon: Package },
 		{ name: 'Reviews', path: APP_ROUTES.REVIEWS, icon: Star },
+		{ name: 'Cart Insights', path: APP_ROUTES.CART_INSIGHTS, icon: ShoppingCart },
+		{ name: 'Wishlist Insights', path: APP_ROUTES.WISHLIST_INSIGHTS, icon: Heart },
+		{ name: 'Orders', path: APP_ROUTES.ORDERS, icon: ShoppingBag },
+		{ name: 'Installment Payments', path: APP_ROUTES.INSTALLMENTS, icon: Wallet },
+		{ name: 'Customer Requests', path: APP_ROUTES.CUSTOMER_REQUESTS, icon: ClipboardList },
 		{ name: 'Staff Members', path: APP_ROUTES.MEMBERS, icon: Contact },
 		{ name: 'Roles & Permissions', path: APP_ROUTES.ROLES, icon: ShieldCheck },
 	];
 
 	return (
 		<ProtectedRoute>
-			<div className='min-h-screen bg-neutral-950 flex text-white font-sans overflow-hidden relative'>
+			<div className='h-screen bg-neutral-950 flex text-white font-sans overflow-hidden relative'>
 				{/* Mobile Backdrop */}
 				{isOpen && <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300' onClick={close} />}
 
@@ -125,7 +147,7 @@ export const AdminLayout: React.FC = () => {
 						</div>
 					</header>
 
-					<div className='flex-1 overflow-auto p-8 relative z-0 hide-scrollbar'>
+					<div className='flex-1 overflow-y-auto p-8 relative z-0 hide-scrollbar'>
 						<Outlet />
 					</div>
 				</main>

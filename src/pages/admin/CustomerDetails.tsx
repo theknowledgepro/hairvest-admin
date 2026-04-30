@@ -10,6 +10,7 @@ import { getCloudFileURL, getFullName } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
 import { CustomerCart } from '../../components/admin/customer/CustomerCart';
+import { CustomerWishlist } from '@/components/admin/customer/CustomerWishlist';
 import { CustomerAddressList } from '../../components/admin/customer/CustomerAddressList';
 import { CustomerCardList } from '../../components/admin/customer/CustomerCardList';
 import { CustomerOrdersList } from '@/components/admin/customer/CustomerOrdersList';
@@ -231,6 +232,9 @@ export const CustomerDetails: React.FC = () => {
 
 					{/* Active Cart */}
 					<CustomerCart customerId={customer.key} />
+
+					{/* Wishlist */}
+					<CustomerWishlist customerId={customer.key} />
 
 					{/* Addresses */}
 					<CustomerAddressList customerId={customer.key} />

@@ -220,6 +220,7 @@ export const ProductCategories: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400 w-[50px]'>S/N</TableHead>
 								<TableHead className='text-neutral-400 w-[100px]'>Image</TableHead>
 								<TableHead className='text-neutral-400'>Category</TableHead>
 								<TableHead className='text-neutral-400'>Status</TableHead>
@@ -240,8 +241,11 @@ export const ProductCategories: React.FC = () => {
 										No categories found. Add one to get started.
 									</TableCell>
 								</TableRow>
-							:	categories.map((category) => (
+							:	categories.map((category, index) => (
 									<TableRow key={category.id} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+										<TableCell className='text-neutral-500 font-medium text-xs'>
+											{index + 1}
+										</TableCell>
 										<TableCell>
 											<div className='h-12 w-12 rounded-[5px] bg-neutral-800 border-neutral-700 overflow-hidden'>
 												{category.image ?

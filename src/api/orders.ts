@@ -4,6 +4,17 @@ import type { BaseAPIResponse, PaginatedResult } from '@/types';
 import type { Product } from './products';
 import type { Customer } from './customers';
 
+export const PRODUCT_ORDER_STATUS = {
+	PENDING: 'PENDING',
+	PAID: 'PAID',
+	PROCESSING: 'PROCESSING',
+	SHIPPED: 'SHIPPED',
+	COMPLETED: 'COMPLETED',
+	CANCELLED: 'CANCELLED',
+} as const;
+
+export type PRODUCT_ORDER_STATUS = (typeof PRODUCT_ORDER_STATUS)[keyof typeof PRODUCT_ORDER_STATUS];
+
 export interface ProductOrder {
 	id: string;
 	key: string;
@@ -20,6 +31,7 @@ export interface ProductOrder {
 	paidAt?: string;
 	paymentChannel?: string;
 	paymentMethod?: string;
+	status: PRODUCT_ORDER_STATUS;
 	isPaid: boolean;
 	isPaymentCompleted: boolean;
 	createdAt?: string;

@@ -1,12 +1,12 @@
 import { API_ROUTES } from '@/config/routes.api';
 import { apiClient } from './client';
 import type { BaseAPIResponse } from '@/types';
+import type { Product } from './products';
 
 export interface CartItem {
 	key: string;
-	product: string;
 	quantity: number;
-	productDetails?: any;
+	product?: Partial<Product>;
 }
 
 export const cartApi = {

@@ -1,22 +1,22 @@
 import React from 'react';
-import { ShoppingCart, Trash2, Loader2, PackageX } from 'lucide-react';
+import { Heart, Trash2, Loader2, PackageX } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { useCustomerCartQuery, useRemoveFromCartMutation, useClearCartMutation } from '@/hooks/useCart';
+import { useCustomerWishlistQuery, useRemoveFromWishlistMutation, useClearWishlistMutation } from '@/hooks/useWishlist';
 import { getCloudFileURL } from '@/lib/utils';
 import { formatCurrency } from '@/lib/formatCurrency';
 
-interface CustomerCartProps {
+interface CustomerWishlistProps {
 	customerId: string;
 }
 
-export const CustomerCart: React.FC<CustomerCartProps> = ({ customerId }) => {
-	const { data: cartResponse, isLoading } = useCustomerCartQuery(customerId);
-	const items = cartResponse?.data?.results || [];
+export const CustomerWishlist: React.FC<CustomerWishlistProps> = ({ customerId }) => {
+	const { data: wishlistResponse, isLoading } = useCustomerWishlistQuery(customerId);
+	const items = wishlistResponse?.data?.results || [];
 
-	const { mutate: removeItem, isPending: isRemoving } = useRemoveFromCartMutation(customerId);
-	const { mutate: clearCart, isPending: isClearing } = useClearCartMutation(customerId);
+	const { mutate: removeItem, isPending: isRemoving } = useRemoveFromWishlistMutation(customerId);
+	const { mutate: clearWishlist, isPending: isClearing } = useClearWishlistMutation(customerId);
 
 	const calculateTotal = () => {
 		return items.reduce((total, item) => {
@@ -29,28 +29,28 @@ export const CustomerCart: React.FC<CustomerCartProps> = ({ customerId }) => {
 		<Card className='bg-neutral-900/50 border-neutral-800 gap-0 pb-0'>
 			<CardHeader className='border-b border-neutral-800 pb-4 flex flex-row items-center justify-between'>
 				<CardTitle className='text-lg font-semibold text-white flex items-center gap-2 m-0'>
-					<ShoppingCart className='h-5 w-5 text-blue-400' /> Active Cart ({items.length})
+					<Heart className='h-5 w-5 text-red-400 fill-red-400/10' /> Saved to Wishlist ({items.length})
 				</CardTitle>
 				{items.length > 0 && (
 					<Button
 						variant='destructive'
 						size='sm'
-						onClick={() => confirm('Are you sure you want to clear the cart?') && clearCart()}
+						onClick={() => confirm('Are you sure you want to clear the wishlist?') && clearWishlist()}
 						disabled={isClearing}>
-						<Trash2 className='h-4 w-4 mr-2' /> Clear Cart
+						<Trash2 className='h-4 w-4 mr-2' /> Clear Wishlist
 					</Button>
 				)}
 			</CardHeader>
 			<CardContent className='p-0'>
 				{isLoading ?
 					<div className='p-12 flex flex-col items-center justify-center text-neutral-500'>
-						<Loader2 className='h-8 w-8 animate-spin text-blue-500' />
+						<Loader2 className='h-8 w-8 animate-spin text-red-500' />
 					</div>
 				: items.length === 0 ?
 					<div className='p-10 flex flex-col items-center justify-center text-neutral-500'>
-						<ShoppingCart className='h-10 w-10 text-neutral-700 mb-4' />
-						<p className='font-medium text-neutral-300'>Cart is empty</p>
-						<p className='text-sm mt-1 text-center max-w-sm'>The customer currently has no items in their cart.</p>
+						<Heart className='h-10 w-10 text-neutral-700 mb-4' />
+						<p className='font-medium text-neutral-300'>Wishlist is empty</p>
+						<p className='text-sm mt-1 text-center max-w-sm'>The customer currently has no items in their wishlist.</p>
 					</div>
 				:	<div>
 						<Table>
@@ -94,7 +94,7 @@ export const CustomerCart: React.FC<CustomerCartProps> = ({ customerId }) => {
 							</TableBody>
 						</Table>
 						<div className='p-4 border-t border-neutral-800 bg-neutral-900/60 flex justify-between items-center rounded-b-xl'>
-							<span className='text-neutral-400 font-medium'>Total Estimated Value</span>
+							<span className='text-neutral-400 font-medium'>Total Wishlist Value</span>
 							<span className='text-lg font-bold text-white'>{formatCurrency(calculateTotal())}</span>
 						</div>
 					</div>

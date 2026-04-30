@@ -14,8 +14,12 @@ export const API_ROUTES = {
 	PRODUCTS: '/products',
 	REVIEWS: '/reviews',
 	ORDERS: '/orders',
+	INSTALLMENTS: '/installments',
 	CARTS: '/carts',
+	WISHLISTS: '/wishlist',
+	BUSINESS_INSIGHTS: '/business-insights',
 
 	CUSTOMERS: '/customers',
 	CUSTOMER_DETAILS: (id: string) => `/customers/${id}`,
+	CUSTOMER_REQUESTS: '/requests',
 };

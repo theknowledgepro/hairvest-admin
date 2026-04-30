@@ -16,8 +16,15 @@ import { ProductForm } from './pages/admin/ProductForm';
 import { Customers } from './pages/admin/Customers';
 import { CustomerDetails } from './pages/admin/CustomerDetails';
 import { ProductDetails } from './pages/admin/ProductDetails';
-import { Reviews } from './pages/admin/Reviews';
 import { ReviewDetails } from './pages/admin/ReviewDetails';
+import { CartInsights } from './pages/admin/CartInsights';
+import { WishlistInsights } from './pages/admin/WishlistInsights';
+import { CustomerRequests } from './pages/admin/CustomerRequests';
+import { Reviews } from './pages/admin/Reviews';
+import { Orders } from './pages/admin/Orders';
+import { OrderDetails } from './pages/admin/OrderDetails';
+import { Installments } from './pages/admin/Installments';
+import { InstallmentDetails } from './pages/admin/InstallmentDetails';
 
 const queryClient = new QueryClient();
 
@@ -54,6 +61,19 @@ function App() {
 							<Route path='reviews'>
 								<Route index element={<Reviews />} />
 								<Route path=':id' element={<ReviewDetails />} />
+							</Route>
+							<Route path='insights'>
+								<Route path='cart' element={<CartInsights />} />
+								<Route path='wishlist' element={<WishlistInsights />} />
+							</Route>
+							<Route path='requests' element={<CustomerRequests />} />
+							<Route path='orders'>
+								<Route index element={<Orders />} />
+								<Route path=':id' element={<OrderDetails />} />
+							</Route>
+							<Route path='installments'>
+								<Route index element={<Installments />} />
+								<Route path=':id' element={<InstallmentDetails />} />
 							</Route>
 						</Route>
 

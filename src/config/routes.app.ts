@@ -11,4 +11,11 @@ export const APP_ROUTES = {
 	PRODUCT_DETAILS: '/admin/products/:id',
 	REVIEWS: '/admin/reviews',
 	REVIEW_DETAILS: '/admin/reviews/:id',
+	CART_INSIGHTS: '/admin/insights/cart',
+	WISHLIST_INSIGHTS: '/admin/insights/wishlist',
+	CUSTOMER_REQUESTS: '/admin/requests',
+	ORDERS: '/admin/orders',
+	ORDER_DETAILS: '/admin/orders/:id',
+	INSTALLMENTS: '/admin/installments',
+	INSTALLMENT_DETAILS: '/admin/installments/:id',
 };

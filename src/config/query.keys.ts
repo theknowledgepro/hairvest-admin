@@ -14,4 +14,9 @@ export const queryKeys = {
 
 	reviews: ['reviews'],
 	orders: ['orders'],
+	installments: ['installments'],
+	cartInsights: ['cart-insights'],
+	wishlistInsights: ['wishlist-insights'],
+	customerRequests: ['customer-requests'],
+	customerRequestDetails: (id: string) => ['customerRequestDetails', id],
 };

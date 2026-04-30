@@ -274,6 +274,7 @@ export const StaffRoles: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400'>S/N</TableHead>
 								<TableHead className='text-neutral-400'>Role Name</TableHead>
 								<TableHead className='text-neutral-400'>Permissions</TableHead>
 								<TableHead className='text-neutral-400 text-right'>Actions</TableHead>
@@ -294,8 +295,9 @@ export const StaffRoles: React.FC = () => {
 										No roles found. Create one to get started.
 									</TableCell>
 								</TableRow>
-							:	roles.map((role) => (
+							:	roles.map((role, index) => (
 									<TableRow key={role.id} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+										<TableCell className='text-neutral-500 font-medium text-xs'>{index + 1}</TableCell>
 										<TableCell>
 											<div>
 												<p className='font-medium text-white'>{role.title}</p>

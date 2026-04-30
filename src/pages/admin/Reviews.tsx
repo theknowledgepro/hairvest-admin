@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Star, MessageSquare, Loader2, MoreHorizontal, Edit, Trash2, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Star, MessageSquare, Loader2, MoreHorizontal, Edit, Trash2, Heart } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,15 +11,15 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useProductReviewsQuery, useDeleteProductReviewMutation, useUpdateProductReviewMutation } from '@/hooks/useProductReviews';
+import { TablePagination } from '../../components/TablePagination';
 import { useAuthStore } from '@/store/useAuthStore';
 import { formatDate } from '@/lib/formatDate';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/config/routes.app';
 import { AddReviewModal } from '@/components/admin/AddReviewModal';
 import { Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getFullName } from '@/lib/utils';
+import { useDeleteProductReviewMutation, useProductReviewsQuery, useUpdateProductReviewMutation } from '@/hooks/useProductReviews';
 
 export const Reviews: React.FC = () => {
 	const navigate = useNavigate();
@@ -75,6 +75,7 @@ export const Reviews: React.FC = () => {
 					<Table>
 						<TableHeader className='bg-neutral-900/80 border-b border-neutral-800'>
 							<TableRow className='hover:bg-transparent border-neutral-800'>
+								<TableHead className='text-neutral-400'>S/N</TableHead>
 								<TableHead className='text-neutral-400'>Customer</TableHead>
 								<TableHead className='text-neutral-400'>Product</TableHead>
 								<TableHead className='text-neutral-400'>Rating</TableHead>
@@ -93,8 +94,9 @@ export const Reviews: React.FC = () => {
 										No reviews found.
 									</TableCell>
 								</TableRow>
-							:	reviews.map((review) => (
+							:	reviews.map((review, index) => (
 									<TableRow key={review.key} className='border-neutral-800 hover:bg-neutral-800/30 transition-colors'>
+										<TableCell className='text-neutral-500 font-medium text-xs'>{(page - 1) * limit + index + 1}</TableCell>
 										<TableCell className='font-medium text-white'>
 											<Button
 												variant='link'
@@ -182,58 +184,14 @@ export const Reviews: React.FC = () => {
 						</TableBody>
 					</Table>
 				</CardContent>
-				{reviews.length > 0 && (
-					<CardFooter className='border-t border-neutral-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-4'>
-						<div className='flex items-center gap-6'>
-							<div className='flex items-center gap-2'>
-								<span className='text-sm text-neutral-400'>Rows per page:</span>
-								<Select
-									value={String(limit)}
-									onValueChange={(val) => {
-										setLimit(Number(val));
-										setPage(1);
-									}}>
-									<SelectTrigger className='w-max bg-neutral-800 border-neutral-700 text-white h-8 focus:ring-1 focus:ring-blue-500'>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent className='bg-neutral-900 border-neutral-800 text-white'>
-										{[10, 20, 50, 100].map((l) => (
-											<SelectItem key={l} value={String(l)} className='focus:bg-neutral-800 focus:text-white'>
-												{l}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<span className='text-sm text-neutral-500'>
-								Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of {totalResults}
-							</span>
-						</div>
-
-						<div className='flex items-center gap-2'>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page <= 1}
-								onClick={() => setPage((p) => Math.max(1, p - 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronLeft className='h-4 w-4' />
-							</Button>
-							<div className='flex items-center gap-1 px-2'>
-								<span className='text-sm font-medium text-white'>Page {page}</span>
-								<span className='text-sm text-neutral-500'>of {totalPages}</span>
-							</div>
-							<Button
-								variant='ghost'
-								size='sm'
-								disabled={page >= totalPages}
-								onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-								className='text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8 p-0'>
-								<ChevronRight className='h-4 w-4' />
-							</Button>
-						</div>
-					</CardFooter>
-				)}
+				<TablePagination
+					page={page}
+					limit={limit}
+					totalResults={totalResults}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					onLimitChange={setLimit}
+				/>
 			</Card>
 		</div>
 	);
