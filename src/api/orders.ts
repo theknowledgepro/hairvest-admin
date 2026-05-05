@@ -15,27 +15,68 @@ export const PRODUCT_ORDER_STATUS = {
 
 export type PRODUCT_ORDER_STATUS = (typeof PRODUCT_ORDER_STATUS)[keyof typeof PRODUCT_ORDER_STATUS];
 
+export interface ProductOrderItem {
+	product: Product;
+	quantity: number;
+	amount: number;
+	checkoutAmount: number;
+	discountPercent: number;
+}
+
+export interface OrderAddress {
+	id: string;
+	key: string;
+	phone: {
+		international: string;
+		national: string;
+		uri: string;
+	};
+	country: {
+		label: string;
+		value: string;
+	};
+	state: {
+		label: string;
+		value: string;
+	};
+	firstName: string;
+	lastName: string;
+	addressLine1: string;
+	addressLine2?: string;
+	apartment?: string;
+	city: string;
+	zipCode: string;
+	isDefault: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
 export interface ProductOrder {
 	id: string;
 	key: string;
 	reference: string;
 	email: string;
-	product: Product;
+	address: OrderAddress;
+	items: ProductOrderItem[];
 	customer: Customer;
 	currency: string;
-	amount: number;
 	quantity: number;
+	itemsAmount: number;
+	itemsCheckoutAmount: number;
+	discountPercent: number;
+	shippingFee: number;
+	shippingProtectionFee: number;
 	checkoutAmount: number;
-	coupon?: { id: string; code: string; key: string; type: string };
-	paystackAccessCode?: string;
-	paidAt?: string;
-	paymentChannel?: string;
 	paymentMethod?: string;
-	status: PRODUCT_ORDER_STATUS;
+	paymentChannel?: string;
+	paidAt?: string;
+	coupon?: { id: string; code: string; key: string; type: string };
 	isPaid: boolean;
 	isPaymentCompleted: boolean;
-	createdAt?: string;
-	updatedAt?: string;
+	status: PRODUCT_ORDER_STATUS;
+	paystackAccessCode?: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export const ordersApi = {

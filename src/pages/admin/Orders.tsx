@@ -129,21 +129,26 @@ export const Orders: React.FC = () => {
 										</TableCell>
 										<TableCell>
 											<div className='flex items-center gap-2'>
-												{order.product?.images?.[0] && (
+												{order.items?.[0]?.product?.images?.[0] && (
 													<img
-														src={getCloudFileURL(order.product.images?.[0]?.thumbnail)}
+														src={getCloudFileURL(order.items[0].product.images[0].thumbnail)}
 														className='h-8 w-8 rounded object-cover border border-neutral-800'
 														alt=''
 													/>
 												)}
-												<div className='flex flex-col'>
-													<span className='text-sm text-neutral-300 truncate max-w-[150px]'>{order.product?.title}</span>
+												<div className='flex flex-col overflow-hidden'>
+													<span className='text-sm text-neutral-300 truncate max-w-[150px]'>
+														{order.items?.[0]?.product?.title || 'Unknown Product'}
+														{order.items && order.items.length > 1 && (
+															<span className='text-blue-400 ml-1'>+{order.items.length - 1} more</span>
+														)}
+													</span>
 													<span className='text-[11px] text-neutral-500'>Qty: {order.quantity}</span>
 												</div>
 											</div>
 										</TableCell>
 										<TableCell>
-											<span className='text-sm font-semibold text-white'>{formatCurrency(order.amount, order.currency)}</span>
+											<span className='text-sm font-semibold text-white'>{formatCurrency(order.checkoutAmount, order.currency)}</span>
 										</TableCell>
 										<TableCell>
 											{order.isPaid ?

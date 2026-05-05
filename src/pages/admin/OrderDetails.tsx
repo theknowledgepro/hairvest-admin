@@ -109,46 +109,59 @@ export const OrderDetails: React.FC = () => {
 								<Package className='h-5 w-5 text-blue-400' /> Items Ordered
 							</CardTitle>
 						</CardHeader>
-						<CardContent className='p-6'>
-							<div className='flex flex-col md:flex-row gap-6'>
-								<div className='w-full md:w-32 h-32 rounded-lg border border-neutral-800 overflow-hidden bg-neutral-950 flex-shrink-0'>
-									{order.product?.images?.[0] ?
-										<img
-											src={getCloudFileURL(order.product.images[0].original)}
-											alt={order.product.title}
-											className='w-full h-full object-cover'
-										/>
-									:	<div className='w-full h-full flex items-center justify-center text-neutral-700'>
-											<Package className='h-8 w-8' />
+						<CardContent className='p-0'>
+							<div className='flex flex-col'>
+								{order.items.map((item, index) => (
+									<div key={index} className={`p-6 flex flex-col md:flex-row gap-6 ${index !== order.items.length - 1 ? 'border-b border-neutral-800' : ''}`}>
+										<div className='w-full md:w-24 h-24 rounded-lg border border-neutral-800 overflow-hidden bg-neutral-950 flex-shrink-0'>
+											{item.product?.images?.[0] ?
+												<img
+													src={getCloudFileURL(item.product.images[0].original)}
+													alt={item.product.title}
+													className='w-full h-full object-cover'
+												/>
+											:	<div className='w-full h-full flex items-center justify-center text-neutral-700'>
+													<Package className='h-8 w-8' />
+												</div>
+											}
 										</div>
-									}
-								</div>
-								<div className='flex-1 space-y-4'>
-									<div className='flex flex-col md:flex-row justify-between gap-4'>
-										<div>
-											<h3 className='text-lg font-bold text-white'>{order.product?.title}</h3>
-											<p className='text-neutral-500 text-sm'>Category: {order.product?.category?.title || 'Uncategorized'}</p>
-										</div>
-										<div className='text-right'>
-											<p className='text-lg font-bold text-white'>{formatCurrency(order.amount, order.currency)}</p>
-											<p className='text-neutral-500 text-sm'>Qty: {order.quantity}</p>
+										<div className='flex-1 space-y-2'>
+											<div className='flex flex-col md:flex-row justify-between gap-4'>
+												<div>
+													<h3 className='text-md font-bold text-white'>{item.product?.title}</h3>
+													<p className='text-neutral-500 text-xs'>Category: {item.product?.category?.title || 'Uncategorized'}</p>
+												</div>
+												<div className='text-right'>
+													<p className='text-md font-bold text-white'>{formatCurrency(item.checkoutAmount, order.currency)}</p>
+													<p className='text-neutral-500 text-xs'>Qty: {item.quantity}</p>
+												</div>
+											</div>
+											<div className='flex items-center justify-between text-xs'>
+												<span className='text-neutral-400'>Item Total</span>
+												<span className='text-white font-medium'>{formatCurrency(item.checkoutAmount * item.quantity, order.currency)}</span>
+											</div>
 										</div>
 									</div>
-									<Separator className='bg-neutral-800' />
+								))}
+								
+								<div className='p-6 bg-neutral-900/30 space-y-3 border-t border-neutral-800'>
+									<div className='flex items-center justify-between text-sm'>
+										<span className='text-neutral-400'>Items Total</span>
+										<span className='text-white font-medium'>{formatCurrency(order.itemsCheckoutAmount, order.currency)}</span>
+									</div>
+									<div className='flex items-center justify-between text-sm'>
+										<span className='text-neutral-400'>Shipping Fee</span>
+										<span className='text-white font-medium'>{formatCurrency(order.shippingFee, order.currency)}</span>
+									</div>
+									<div className='flex items-center justify-between text-sm'>
+										<span className='text-neutral-400'>Protection Fee</span>
+										<span className='text-white font-medium'>{formatCurrency(order.shippingProtectionFee, order.currency)}</span>
+									</div>
+									<Separator className='bg-neutral-800 my-2' />
 									<div className='flex items-center justify-between'>
-										<span className='text-neutral-400'>Subtotal</span>
-										<span className='text-white font-medium'>{formatCurrency(order.amount * order.quantity, order.currency)}</span>
-									</div>
-									{order.coupon && (
-										<div className='flex items-center justify-between text-emerald-400 text-sm italic'>
-											<span>Coupon Applied ({order.coupon.code})</span>
-											<span>Included</span>
-										</div>
-									)}
-									<div className='flex items-center justify-between pt-2'>
 										<span className='text-lg font-bold text-white'>Total Charged</span>
 										<span className='text-xl font-bold text-blue-400'>
-											{formatCurrency(order.checkoutAmount || order.amount * order.quantity, order.currency)}
+											{formatCurrency(order.checkoutAmount, order.currency)}
 										</span>
 									</div>
 								</div>
@@ -263,9 +276,15 @@ export const OrderDetails: React.FC = () => {
 								<div className='flex items-start gap-3'>
 									<MapPin className='h-5 w-5 text-neutral-600 mt-0.5' />
 									<div className='flex-1'>
-										<p className='text-white font-medium'>Main Shipping Address</p>
+										<p className='text-white font-medium'>{order.address?.firstName} {order.address?.lastName}</p>
 										<p className='text-neutral-400 text-sm mt-1 leading-relaxed'>
-											Check customer profile for registered shipping addresses.
+											{order.address?.addressLine1}{order.address?.addressLine2 ? `, ${order.address.addressLine2}` : ''}<br />
+											{order.address?.apartment ? `${order.address.apartment}, ` : ''}{order.address?.city}<br />
+											{order.address?.state?.label}, {order.address?.country?.label}<br />
+											{order.address?.zipCode}
+										</p>
+										<p className='text-neutral-300 text-sm mt-3 font-medium'>
+											{order.address?.phone?.international}
 										</p>
 									</div>
 								</div>
