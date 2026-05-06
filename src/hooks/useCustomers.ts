@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { customersApi } from '../api/customers';
 import type { Customer } from '../api/customers';
@@ -8,6 +8,15 @@ export const useCustomersQuery = (params?: { page?: number; limit?: number; sear
 	return useQuery({
 		queryKey: [...queryKeys.customers, params?.page, params?.limit, params?.search],
 		queryFn: () => customersApi.getCustomers(params),
+	});
+};
+
+export const useCustomersInfiniteQuery = (params?: { limit?: number; search?: string }) => {
+	return useInfiniteQuery({
+		queryKey: [...queryKeys.customers, 'infinite', params?.limit, params?.search],
+		queryFn: ({ pageParam }) => customersApi.getCustomers({ ...params, page: pageParam as number }),
+		getNextPageParam: (lastPage) => (lastPage.data?.hasNextPage ? lastPage.data.currentPage + 1 : undefined),
+		initialPageParam: 1,
 	});
 };
 

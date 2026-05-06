@@ -21,9 +21,14 @@ import {
 	ExternalLink,
 	Clock,
 } from 'lucide-react';
-import { getCloudFileURL } from '../../lib/utils';
+import { getCloudFileURL, getOrderStatusStyles, getOrderStatusIcon, cn, getFullName } from '../../lib/utils';
+import { PRODUCT_ORDER_STATUS } from '@/api/orders';
 import { formatDate } from '@/lib/formatDate';
 import { useAuthStore } from '@/store/useAuthStore';
+import { APP_ROUTES } from '@/config/routes.app';
+import { formatCurrency } from '@/lib/formatCurrency';
+import { OrderTrackingTimeline } from '@/components/admin/orders/OrderTrackingTimeline';
+import { UpdateTrackingDialog } from '@/components/admin/orders/UpdateTrackingDialog';
 
 export const OrderDetails: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -33,13 +38,6 @@ export const OrderDetails: React.FC = () => {
 
 	const { data: orderResponse, isLoading } = useProductOrderQuery(businessId, id);
 	const order = orderResponse?.data?.order;
-
-	const formatCurrency = (amount: number, currency: string) => {
-		return new Intl.NumberFormat('en-NG', {
-			style: 'currency',
-			currency: currency || 'NGN',
-		}).format(amount);
-	};
 
 	if (isLoading) {
 		return (
@@ -67,8 +65,8 @@ export const OrderDetails: React.FC = () => {
 			<Button
 				variant='ghost'
 				onClick={() => navigate(-1)}
-				className='mb-6 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2 p-0 h-auto hover:bg-transparent'>
-				<ChevronLeft className='h-4 w-4' /> Back to Orders
+				className='mb-6 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2 h-auto hover:bg-transparent'>
+				<ChevronLeft className='h-4 w-4' /> Back
 			</Button>
 
 			<div className='flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8'>
@@ -80,22 +78,45 @@ export const OrderDetails: React.FC = () => {
 						<h2 className='text-2xl font-bold text-white flex items-center gap-3'>Order #{order.reference}</h2>
 						<div className='flex items-center gap-3 mt-1'>
 							<span className='text-neutral-500 text-sm flex items-center gap-1'>
-								<Calendar className='h-3.5 w-3.5' /> {order.createdAt ? formatDate(order.createdAt) : '—'}
+								<Calendar className='h-3.5 w-3.5' /> {order.createdAt ? formatDate(order.createdAt) : '-'}
 							</span>
-							<Separator orientation='vertical' className='h-3 bg-neutral-800' />
+
+							<div className='h-4 w-px bg-neutral-800' />
+
 							{order.isPaid ?
-								<Badge className='bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'>
+								<Badge className='text-[11px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'>
 									<CheckCircle2 className='h-3 w-3 mr-1' /> Paid
 								</Badge>
-							:	<Badge className='bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'>
+							:	<Badge className='text-[11px] font-bold uppercase tracking-widest bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'>
 									<XCircle className='h-3 w-3 mr-1' /> Unpaid
 								</Badge>
 							}
+
+							{order.status !== PRODUCT_ORDER_STATUS.PAID && (
+								<React.Fragment>
+									<div className='h-4 w-px bg-neutral-800' />
+									{(() => {
+										const StatusIcon = getOrderStatusIcon(order.status);
+										return (
+											<div
+												className={cn(
+													'flex items-center gap-1.5 px-2.5 py-1 rounded-full w-max border text-[10px] font-bold uppercase tracking-widest',
+													getOrderStatusStyles(order.status),
+												)}>
+												<StatusIcon
+													className={cn('h-3 w-3', order.status === PRODUCT_ORDER_STATUS.PROCESSING && 'animate-spin')}
+												/>
+												<span>{order.status}</span>
+											</div>
+										);
+									})()}
+								</React.Fragment>
+							)}
 						</div>
 					</div>
 				</div>
 				<div className='flex gap-3'>
-					<Button className='bg-blue-600 hover:bg-blue-700 text-white border-none'>Update Status</Button>
+					<UpdateTrackingDialog businessId={businessId} orderId={id!} currentStatus={order.status} />
 				</div>
 			</div>
 
@@ -103,7 +124,7 @@ export const OrderDetails: React.FC = () => {
 				{/* Left Column - Product & Payment */}
 				<div className='lg:col-span-2 space-y-6'>
 					{/* Product Card */}
-					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur overflow-hidden'>
+					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur overflow-hidden gap-0 pb-0'>
 						<CardHeader className='border-b border-neutral-800 bg-neutral-900/30'>
 							<CardTitle className='text-lg font-semibold flex items-center gap-2'>
 								<Package className='h-5 w-5 text-blue-400' /> Items Ordered
@@ -112,7 +133,9 @@ export const OrderDetails: React.FC = () => {
 						<CardContent className='p-0'>
 							<div className='flex flex-col'>
 								{order.items.map((item, index) => (
-									<div key={index} className={`p-6 flex flex-col md:flex-row gap-6 ${index !== order.items.length - 1 ? 'border-b border-neutral-800' : ''}`}>
+									<div
+										key={index}
+										className={`p-6 flex flex-col md:flex-row gap-6 ${index !== order.items.length - 1 ? 'border-b border-neutral-800' : ''}`}>
 										<div className='w-full md:w-24 h-24 rounded-lg border border-neutral-800 overflow-hidden bg-neutral-950 flex-shrink-0'>
 											{item.product?.images?.[0] ?
 												<img
@@ -129,40 +152,69 @@ export const OrderDetails: React.FC = () => {
 											<div className='flex flex-col md:flex-row justify-between gap-4'>
 												<div>
 													<h3 className='text-md font-bold text-white'>{item.product?.title}</h3>
-													<p className='text-neutral-500 text-xs'>Category: {item.product?.category?.title || 'Uncategorized'}</p>
+													<p className='text-neutral-500 text-xs'>
+														Category: {item.product?.category?.title || 'Uncategorized'}
+													</p>
 												</div>
 												<div className='text-right'>
+													{item.discountPercent > 0 && (
+														<div className='flex items-center justify-end gap-2 mb-1'>
+															<span className='text-[13px] text-neutral-500 line-through'>
+																{formatCurrency(item.amount, order.currency)}
+															</span>
+															<Badge className='text-[13px] h-4 px-1.5 bg-red-500/10 text-red-400 border-red-500/20 uppercase font-bold tracking-tighter'>
+																-{item.discountPercent}%
+															</Badge>
+														</div>
+													)}
 													<p className='text-md font-bold text-white'>{formatCurrency(item.checkoutAmount, order.currency)}</p>
-													<p className='text-neutral-500 text-xs'>Qty: {item.quantity}</p>
+													<p className='text-neutral-500 text-[13px]'>Qty: {item.quantity}</p>
 												</div>
 											</div>
 											<div className='flex items-center justify-between text-xs'>
 												<span className='text-neutral-400'>Item Total</span>
-												<span className='text-white font-medium'>{formatCurrency(item.checkoutAmount * item.quantity, order.currency)}</span>
+												<span className='text-white font-medium'>
+													{formatCurrency(item.checkoutAmount * item.quantity, order.currency)}
+												</span>
 											</div>
 										</div>
 									</div>
 								))}
-								
+
 								<div className='p-6 bg-neutral-900/30 space-y-3 border-t border-neutral-800'>
 									<div className='flex items-center justify-between text-sm'>
-										<span className='text-neutral-400'>Items Total</span>
-										<span className='text-white font-medium'>{formatCurrency(order.itemsCheckoutAmount, order.currency)}</span>
+										<span className='text-neutral-400'>Total Items</span>
+										<span className='text-white font-medium'>{order.quantity}</span>
 									</div>
+									<div className='flex items-center justify-between text-sm'>
+										<span className='text-neutral-400'>Items Total</span>
+										<div className='flex items-center gap-2'>
+											{order.discountPercent > 0 && (
+												<span className='text-neutral-500 line-through text-xs'>
+													{formatCurrency(order.itemsAmount, order.currency)}
+												</span>
+											)}
+											<span className='text-white font-medium'>{formatCurrency(order.itemsCheckoutAmount, order.currency)}</span>
+										</div>
+									</div>
+									{order.discountPercent > 0 && (
+										<div className='flex items-center justify-between text-sm text-red-400'>
+											<span className='font-medium'>Total Discount Applied</span>
+											<span className='font-bold italic'>-{order.discountPercent.toFixed(2)}%</span>
+										</div>
+									)}
 									<div className='flex items-center justify-between text-sm'>
 										<span className='text-neutral-400'>Shipping Fee</span>
 										<span className='text-white font-medium'>{formatCurrency(order.shippingFee, order.currency)}</span>
 									</div>
 									<div className='flex items-center justify-between text-sm'>
-										<span className='text-neutral-400'>Protection Fee</span>
+										<span className='text-neutral-400'>Shipping Protection Fee</span>
 										<span className='text-white font-medium'>{formatCurrency(order.shippingProtectionFee, order.currency)}</span>
 									</div>
 									<Separator className='bg-neutral-800 my-2' />
 									<div className='flex items-center justify-between'>
 										<span className='text-lg font-bold text-white'>Total Charged</span>
-										<span className='text-xl font-bold text-blue-400'>
-											{formatCurrency(order.checkoutAmount, order.currency)}
-										</span>
+										<span className='text-xl font-bold text-blue-400'>{formatCurrency(order.checkoutAmount, order.currency)}</span>
 									</div>
 								</div>
 							</div>
@@ -170,7 +222,7 @@ export const OrderDetails: React.FC = () => {
 					</Card>
 
 					{/* Payment Details Card */}
-					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur overflow-hidden'>
+					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur overflow-hidden gap-0 pb-0'>
 						<CardHeader className='border-b border-neutral-800 bg-neutral-900/30'>
 							<CardTitle className='text-lg font-semibold flex items-center gap-2'>
 								<CreditCard className='h-5 w-5 text-purple-400' /> Payment Information
@@ -193,25 +245,19 @@ export const OrderDetails: React.FC = () => {
 								</div>
 								<div className='flex flex-col gap-1'>
 									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Payment Method</span>
-									<p className='text-white font-medium capitalize'>{order.paymentMethod || '—'}</p>
+									<p className='text-white font-medium capitalize'>{order.paymentMethod || '-'}</p>
 								</div>
 								<div className='flex flex-col gap-1'>
 									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Payment Channel</span>
-									<p className='text-white font-medium capitalize'>{order.paymentChannel || 'Paystack'}</p>
+									<p className='text-white font-medium capitalize'>{order.paymentChannel || '-'}</p>
 								</div>
 							</div>
 							<div className='space-y-4'>
 								<div className='flex flex-col gap-1'>
-									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Transaction Date</span>
-									<p className='text-white font-medium'>{order.paidAt ? formatDate(order.paidAt) : 'Not Yet Paid'}</p>
-								</div>
-								<div className='flex flex-col gap-1'>
-									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Paystack Access Code</span>
-									<p className='text-white font-mono text-xs'>{order.paystackAccessCode || '—'}</p>
-								</div>
-								<div className='flex flex-col gap-1'>
-									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Internal Key</span>
-									<p className='text-neutral-400 font-mono text-[10px]'>{order.key}</p>
+									<span className='text-xs text-neutral-500 uppercase font-bold tracking-wider'>Payment Date</span>
+									<p className='text-white font-medium'>
+										{order.completedPaymentAt ? formatDate(order.completedPaymentAt) : 'Not Yet Paid'}
+									</p>
 								</div>
 							</div>
 						</CardContent>
@@ -221,7 +267,7 @@ export const OrderDetails: React.FC = () => {
 				{/* Right Column - Customer & Shipping */}
 				<div className='space-y-6'>
 					{/* Customer Info Card */}
-					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur'>
+					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur gap-0 pb-0'>
 						<CardHeader className='border-b border-neutral-800 bg-neutral-900/30'>
 							<CardTitle className='text-lg font-semibold flex items-center gap-2'>
 								<User className='h-5 w-5 text-blue-400' /> Customer
@@ -239,33 +285,32 @@ export const OrderDetails: React.FC = () => {
 									}
 								</Avatar>
 								<div>
-									<h4 className='text-white font-bold text-lg leading-tight'>
-										{order.customer?.firstName} {order.customer?.lastName}
-									</h4>
-									<p className='text-neutral-500 text-sm'>{order.email}</p>
+									<h4 className='text-white font-bold text-lg leading-tight'>{getFullName(order.customer)}</h4>
+									<p className='text-neutral-500 text-sm break-all'>{order.email}</p>
 								</div>
 							</div>
 							<div className='space-y-4 text-sm'>
 								<div className='flex justify-between'>
 									<span className='text-neutral-500'>Phone</span>
-									<span className='text-neutral-300 font-medium'>{order.customer?.phone?.international || '—'}</span>
+									<span className='text-neutral-300 font-medium'>{order.customer?.phone?.international || '-'}</span>
 								</div>
 								<div className='flex justify-between'>
 									<span className='text-neutral-500'>Gender</span>
-									<span className='text-neutral-300 font-medium capitalize'>{order.customer?.gender || '—'}</span>
+									<span className='text-neutral-300 font-medium capitalize'>{order.customer?.gender || '-'}</span>
 								</div>
 								<Separator className='bg-neutral-800' />
 								<Button
 									variant='outline'
+									onClick={() => navigate(`${APP_ROUTES.CUSTOMERS}/${order?.customer?.id}`)}
 									className='w-full border-neutral-800 text-neutral-300 hover:text-white hover:bg-neutral-800 flex items-center justify-center gap-2'>
-									View Customer Profile <ExternalLink className='h-3.5 w-3.5' />
+									View Customer <ExternalLink className='h-3.5 w-3.5' />
 								</Button>
 							</div>
 						</CardContent>
 					</Card>
 
 					{/* Delivery/Address Card */}
-					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur'>
+					<Card className='bg-neutral-900/50 border-neutral-800 backdrop-blur gap-0 pb-0'>
 						<CardHeader className='border-b border-neutral-800 bg-neutral-900/30'>
 							<CardTitle className='text-lg font-semibold flex items-center gap-2'>
 								<MapPin className='h-5 w-5 text-rose-400' /> Delivery Address
@@ -276,16 +321,19 @@ export const OrderDetails: React.FC = () => {
 								<div className='flex items-start gap-3'>
 									<MapPin className='h-5 w-5 text-neutral-600 mt-0.5' />
 									<div className='flex-1'>
-										<p className='text-white font-medium'>{order.address?.firstName} {order.address?.lastName}</p>
+										<p className='text-white font-medium'>{getFullName(order.address)}</p>
 										<p className='text-neutral-400 text-sm mt-1 leading-relaxed'>
-											{order.address?.addressLine1}{order.address?.addressLine2 ? `, ${order.address.addressLine2}` : ''}<br />
-											{order.address?.apartment ? `${order.address.apartment}, ` : ''}{order.address?.city}<br />
-											{order.address?.state?.label}, {order.address?.country?.label}<br />
+											{order.address?.addressLine1}
+											{order.address?.addressLine2 ? `, ${order.address.addressLine2}` : ''}
+											<br />
+											{order.address?.apartment ? `${order.address.apartment}, ` : ''}
+											{order.address?.city}
+											<br />
+											{order.address?.state?.label}, {order.address?.country?.label}
+											<br />
 											{order.address?.zipCode}
 										</p>
-										<p className='text-neutral-300 text-sm mt-3 font-medium'>
-											{order.address?.phone?.international}
-										</p>
+										<p className='text-neutral-300 text-sm mt-3 font-medium'>{order.address?.phone?.international}</p>
 									</div>
 								</div>
 								<Separator className='bg-neutral-800' />
@@ -293,12 +341,14 @@ export const OrderDetails: React.FC = () => {
 									<Hash className='h-5 w-5 text-neutral-600 mt-0.5' />
 									<div className='flex-1'>
 										<p className='text-white font-medium font-mono text-sm uppercase tracking-wider'>Tracking Number</p>
-										<p className='text-neutral-500 text-xs mt-1'>Not assigned yet</p>
+										<p className='text-neutral-300 text-xs mt-1'>{order.id}</p>
 									</div>
 								</div>
 							</div>
 						</CardContent>
 					</Card>
+
+					<OrderTrackingTimeline trackingHistory={order.trackingHistory} />
 				</div>
 			</div>
 		</div>

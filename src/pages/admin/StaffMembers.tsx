@@ -383,7 +383,7 @@ export const StaffMembers: React.FC = () => {
 							: members.length === 0 ?
 								<TableRow>
 									<TableCell colSpan={6} className='text-center py-10 text-neutral-500'>
-										No members found. Add one to get started.
+										No members found.
 									</TableCell>
 								</TableRow>
 							:	members.map((member, index) => (

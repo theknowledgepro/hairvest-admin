@@ -5,7 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Loader2, ArrowLeft, ShieldAlert, MapPin, Mail, Phone, Calendar, UserSearch, User2Icon, Ruler, Scissors, BrainCircuit, Contact2 } from 'lucide-react';
+import {
+	Loader2,
+	ArrowLeft,
+	ShieldAlert,
+	MapPin,
+	Mail,
+	Phone,
+	Calendar,
+	UserSearch,
+	User2Icon,
+	Ruler,
+	Scissors,
+	BrainCircuit,
+	Contact2,
+} from 'lucide-react';
 import { getCloudFileURL, getFullName } from '../../lib/utils';
 import { APP_ROUTES } from '../../config/routes.app';
 import { formatDate } from '@/lib/formatDate';
@@ -139,7 +153,7 @@ export const CustomerDetails: React.FC = () => {
 					</Card>
 
 					{/* Admin Controls */}
-					<Card className='bg-neutral-900/50 border-neutral-800'>
+					<Card className='bg-neutral-900/50 border-neutral-800 gap-0'>
 						<CardHeader>
 							<CardTitle className='text-lg font-semibold text-white'>Admin Controls</CardTitle>
 						</CardHeader>
@@ -166,9 +180,7 @@ export const CustomerDetails: React.FC = () => {
 					{/* Measurements & Preferences */}
 					<Card className='bg-neutral-900/50 border-neutral-800'>
 						<CardHeader>
-							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>
-								Fitting & Measurements
-							</CardTitle>
+							<CardTitle className='text-lg font-semibold text-white flex items-center gap-2'>Fitting & Measurements</CardTitle>
 						</CardHeader>
 						<CardContent className='space-y-6'>
 							{/* Head Sizes */}
@@ -180,7 +192,9 @@ export const CustomerDetails: React.FC = () => {
 								<div className='flex flex-wrap gap-2'>
 									{customer.headSizes?.length ?
 										customer.headSizes.map((size: string, i: number) => (
-											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20'>
+											<span
+												key={i}
+												className='px-2 py-0.5 text-xs font-semibold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20'>
 												{size}
 											</span>
 										))
@@ -197,7 +211,9 @@ export const CustomerDetails: React.FC = () => {
 								<div className='flex flex-wrap gap-2'>
 									{customer.hairLengths?.length ?
 										customer.hairLengths.map((length: string, i: number) => (
-											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'>
+											<span
+												key={i}
+												className='px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'>
 												{length}
 											</span>
 										))
@@ -214,7 +230,9 @@ export const CustomerDetails: React.FC = () => {
 								<div className='flex flex-wrap gap-2'>
 									{customer.hairPatterns?.length ?
 										customer.hairPatterns.map((pattern: string, i: number) => (
-											<span key={i} className='px-2 py-0.5 text-xs font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/20'>
+											<span
+												key={i}
+												className='px-2 py-0.5 text-xs font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/20'>
 												{pattern}
 											</span>
 										))
@@ -223,6 +241,9 @@ export const CustomerDetails: React.FC = () => {
 							</div>
 						</CardContent>
 					</Card>
+
+					{/* Payment Cards */}
+					<CustomerCardList customerId={customer.key} />
 				</div>
 
 				{/* Right Main Content (Placeholders) */}
@@ -238,9 +259,6 @@ export const CustomerDetails: React.FC = () => {
 
 					{/* Addresses */}
 					<CustomerAddressList customerId={customer.key} />
-
-					{/* Payment Cards */}
-					<CustomerCardList customerId={customer.key} />
 				</div>
 			</div>
 		</div>

@@ -13,7 +13,7 @@ export const CustomerCardList = ({ customerId }: CustomerCardListProps) => {
 	const cards = response?.data?.results || [];
 
 	return (
-		<Card className='bg-neutral-900/50 border-neutral-800'>
+		<Card className='bg-neutral-900/50 border-neutral-800 gap-0 pb-0'>
 			<CardHeader className='border-b border-neutral-800 pb-4 flex flex-row items-center justify-between'>
 				<CardTitle className='text-lg font-semibold text-white flex items-center gap-2 m-0'>
 					<CreditCard className='h-5 w-5 text-blue-400' /> Payment Cards ({cards.length})

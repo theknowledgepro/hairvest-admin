@@ -15,3 +15,10 @@ export const useWishlistInsightsQuery = (page = 1, limit = 50, search = '') => {
 		queryFn: () => insightsApi.getWishlistInsights(page, limit, search),
 	});
 };
+
+export const useMainStatsQuery = () => {
+	return useQuery({
+		queryKey: queryKeys.mainStats,
+		queryFn: () => insightsApi.getMainStats(),
+	});
+};

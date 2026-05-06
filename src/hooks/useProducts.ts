@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { productsApi } from '../api/products';
 import { toast } from 'sonner';
 import { queryKeys } from '@/config/query.keys';
@@ -7,6 +7,16 @@ export const useProductsQuery = (params?: { businessId: string; page?: number; l
 	return useQuery({
 		queryKey: [...queryKeys.products, params],
 		queryFn: () => productsApi.getProducts(params!),
+		enabled: !!params?.businessId,
+	});
+};
+
+export const useProductsInfiniteQuery = (params?: { businessId: string; limit?: number; search?: string }) => {
+	return useInfiniteQuery({
+		queryKey: [...queryKeys.products, 'infinite', params],
+		queryFn: ({ pageParam }) => productsApi.getProducts({ ...params!, page: pageParam as number }),
+		getNextPageParam: (lastPage) => (lastPage.data?.hasNextPage ? lastPage.data.currentPage + 1 : undefined),
+		initialPageParam: 1,
 		enabled: !!params?.businessId,
 	});
 };

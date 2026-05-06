@@ -32,6 +32,7 @@ export interface Product {
 
 	// Aggregated fields
 	salesCount: number;
+	salesTotal: number;
 	cartCount: number;
 	reviewsCount: number;
 	avgRating: number;

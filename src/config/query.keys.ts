@@ -19,4 +19,5 @@ export const queryKeys = {
 	wishlistInsights: ['wishlist-insights'],
 	customerRequests: ['customer-requests'],
 	customerRequestDetails: (id: string) => ['customerRequestDetails', id],
+	mainStats: ['main-stats'],
 };

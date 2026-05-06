@@ -164,7 +164,7 @@ export const Installments: React.FC = () => {
 										<TableCell className='font-mono text-xs text-blue-400 font-medium'>{plan.order?.reference}</TableCell>
 										<TableCell>
 											<span className='text-sm text-neutral-300 truncate max-w-[150px] block'>
-												{plan.order?.product?.title || 'Product Details'}
+												{plan.order?.items?.[0]?.product?.title || 'Product Details'}
 											</span>
 										</TableCell>
 										<TableCell>

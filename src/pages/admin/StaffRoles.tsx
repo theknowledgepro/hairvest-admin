@@ -292,7 +292,7 @@ export const StaffRoles: React.FC = () => {
 							: roles.length === 0 ?
 								<TableRow>
 									<TableCell colSpan={4} className='text-center py-10 text-neutral-500'>
-										No roles found. Create one to get started.
+										No roles found.
 									</TableCell>
 								</TableRow>
 							:	roles.map((role, index) => (
