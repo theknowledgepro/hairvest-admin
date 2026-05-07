@@ -111,7 +111,7 @@ export const InstallmentDetails: React.FC = () => {
 						<div className='flex items-center gap-3 mt-1'>
 							<span className='text-neutral-500 text-sm flex items-center gap-1 font-mono uppercase tracking-wider'>ID: {plan.key}</span>
 							<Separator orientation='vertical' className='h-3 bg-neutral-800' />
-				{getStatusBadge(plan.status)}
+							{getStatusBadge(plan.status)}
 						</div>
 					</div>
 				</div>
@@ -283,9 +283,9 @@ export const InstallmentDetails: React.FC = () => {
 						<CardContent className='p-6 space-y-6'>
 							<div className='flex items-start gap-4'>
 								<div className='h-16 w-16 rounded-lg bg-neutral-950 border border-neutral-800 flex-shrink-0 overflow-hidden'>
-									{plan.order?.product?.images?.[0] ?
+									{plan.order?.items?.[0]?.product?.images?.[0] ?
 										<img
-											src={getCloudFileURL(plan.order.product.images[0].thumbnail)}
+											src={getCloudFileURL(plan.order.items[0].product.images[0].thumbnail)}
 											alt='Product'
 											className='w-full h-full object-cover'
 										/>
@@ -295,7 +295,7 @@ export const InstallmentDetails: React.FC = () => {
 									}
 								</div>
 								<div className='flex-1 min-w-0'>
-									<p className='text-white font-bold text-sm truncate'>{plan.order?.product?.title || 'Product Item'}</p>
+									<p className='text-white font-bold text-sm truncate'>{plan.order?.items?.[0]?.product?.title || 'Product Item'}</p>
 									<p className='text-neutral-500 text-xs mt-0.5'>Ref: {plan.order?.reference}</p>
 									<p className='text-blue-400 text-xs font-medium mt-1'>{plan.order?.status || 'N/A'}</p>
 								</div>
